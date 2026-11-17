@@ -5,6 +5,7 @@
 alias.csv
 datos/
 respaldos/
+secrets/
 
 # Python
 __pycache__/

@@ -55,7 +55,7 @@ Reemplazar el Excel en la DDGS con un sistema web que:
 | --- | --- | --- |
 | ADR-01 | **Monolito modular** (un despliegue, apps Django con límites claros), no microservicios | 20 usuarios, ~1.500 docs/año, equipo pequeño. Un módulo se separa solo si un equipo propio o una carga distinta lo exige. |
 | ADR-02 | **Django 5.2 LTS** + Django REST Framework + plantillas Django con **HTMX** | Admin incluido para catálogos, ORM y migraciones maduras, UI sin SPA = menos piezas que mantener. 5.2 LTS tiene soporte de seguridad hasta abril 2028; planificar migración a 6.2 LTS (abril 2027). |
-| ADR-03 | **PostgreSQL 16 con extensión pgvector** (imagen `pgvector/pgvector:pg16`) | Una sola base; vectores en la misma base cuando llegue la fase de IA. |
+| ADR-03 | **PostgreSQL 17 con extensión pgvector 0.8.x** (imagen `pgvector/pgvector:pg17`) | Una sola base para datos y vectores: los filtros de permisos y de proyecto se aplican en la misma consulta que la búsqueda semántica (pgvector 0.8 mejoró el filtrado con escaneo iterativo de índices HNSW). Sin base vectorial separada salvo ADR con medición. |
 | ADR-04 | **Almacenamiento de objetos con API S3**, autoalojado con **SeaweedFS** (alternativa: Garage). **No usar MinIO Community** | MinIO Community dejó de publicar imágenes Docker en oct-2025 y su repositorio fue archivado en 2026. Con API S3 se puede migrar a otro proveedor cambiando solo variables de entorno (`django-storages` + `boto3`). |
 | ADR-05 | **Outbox transaccional** en PostgreSQL + proceso `worker` | Eventos confiables sin Redis/Kafka. El worker procesa la tabla. |
 | ADR-06 | **Bitácora append-only** con trigger de PostgreSQL que bloquea UPDATE/DELETE | Auditoría que ni el administrador de la app puede alterar desde el ORM. |
@@ -71,13 +71,15 @@ Reemplazar el Excel en la DDGS con un sistema web que:
 ├── docker-compose.yml       # entorno local y de piloto
 ├── .env.example
 ├── Dockerfile               # (a crear)
-├── pyproject.toml           # (a crear) dependencias y ruff/pytest
+├── pyproject.toml           # (a crear) dependencias (uv + uv.lock), ruff, pytest
+├── SECURITY.md              # reporte de vulnerabilidades
 ├── manage.py
 ├── config/                  # settings (base, dev, prod), urls, wsgi/asgi
 ├── apps/
 │   ├── core/                # unidades, cargos, personas, ocupaciones, instituciones, proyectos, procesos
 │   ├── correspondencia/     # expedientes, documentos, destinatarios, derivaciones, CITE, envíos masivos
 │   ├── archivos/            # adjuntos, hash, almacenamiento S3
+│   ├── seguridad/           # autenticación, 2FA, permisos puede(), clasificación, sesiones (docs/seguridad.md)
 │   ├── auditoria/           # bitácora (append-only)
 │   ├── eventos/             # outbox + worker
 │   ├── importacion/         # importador del Excel histórico
@@ -248,7 +250,7 @@ Servicios (ver `docker-compose.yml`):
 
 | Servicio | Imagen | Rol |
 | --- | --- | --- |
-| `db` | `pgvector/pgvector:pg16` | PostgreSQL con pgvector |
+| `db` | `pgvector/pgvector:pg17` | PostgreSQL con pgvector |
 | `s3` | `chrislusf/seaweedfs` (fijar versión) | Almacenamiento de objetos S3 |
 | `s3-init` | misma imagen o `amazon/aws-cli` | Crea el bucket al iniciar |
 | `web` | build local | Django + gunicorn (migrate + collectstatic al arrancar) |
@@ -262,7 +264,7 @@ Servicios (ver `docker-compose.yml`):
 
 ### 11.1 Respaldo
 
-`scripts/backup.sh`: `pg_dump` en formato custom + copia del bucket, empaquetado y **cifrado** con `restic` hacia un repositorio externo configurable (disco, otro servidor o nube S3). `scripts/restore.sh` documentado y probado en CI con datos sintéticos. Retención por defecto: 7 diarios, 4 semanales, 12 mensuales.
+Respaldo cifrado en origen con `restic` hacia **uno o varios destinos a la vez**: disco/NAS, SFTP, AWS S3 y compatibles, Google Cloud Storage, Azure Blob, Backblaze B2 y, vía `rclone`, Dropbox, OneDrive o Google Drive. Servicio `backup` (perfil `backup`), metas RPO 24 h / RTO 4 h, custodia de claves y pruebas de restauración: ver **`docs/respaldos.md`**.
 
 ## 12. Calidad y pruebas
 
@@ -283,12 +285,11 @@ Servicios (ver `docker-compose.yml`):
 
 ## 13. Seguridad
 
-- `DEBUG=False` en producción, `ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS`, cookies seguras, HSTS detrás de TLS.
-- Contraseñas con validadores de Django; bloqueo tras intentos fallidos (`django-axes`).
-- Archivos servidos solo mediante URL firmada de corta duración o vista que verifica permisos; el bucket nunca es público.
-- Cabeceras CSP (Django 6 trae soporte nativo; en 5.2 usar `django-csp`).
-- Registro de accesos a expedientes confidenciales en bitácora.
-- Datos de prueba siempre sintéticos.
+Ver **`docs/seguridad.md`** (módulo `apps/seguridad`). Resumen: OWASP ASVS 5.0 nivel 2 como estándar de verificación; alineación con el PISI de la Gobernación; 2FA obligatorio para roles privilegiados; autorización centralizada `puede(usuario, accion, objeto)` (RBAC + atributos de unidad, cargo y clasificación); clasificación público/interno/confidencial/reservado; archivos nunca públicos; bitácora de seguridad; controles automáticos en CI (bandit, pip-audit, gitleaks, trivy, `check --deploy`).
+
+## 13 bis. Políticas de ingeniería
+
+Ver **`docs/politicas-ingenieria.md`**: stack fijo y política de versiones, límites entre módulos (`services.py`/`selectors.py` + `import-linter`), Git y revisiones, CI bloqueante, migraciones *expand → contract*, versionado semántico, entornos, escalamiento por etapas, documentación como código y definición de terminado.
 
 ## 14. Criterios de aceptación del prototipo
 

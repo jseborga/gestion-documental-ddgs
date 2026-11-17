@@ -4,6 +4,9 @@ Prototipo de sistema de correspondencia para la Dirección de Desarrollo y Gesti
 
 - **Qué construir:** [`SPEC.md`](SPEC.md)
 - **Cómo construirlo (instrucciones para Claude Code):** [`CLAUDE.md`](CLAUDE.md)
+- **Seguridad:** [`docs/seguridad.md`](docs/seguridad.md) · [`SECURITY.md`](SECURITY.md)
+- **Políticas de ingeniería:** [`docs/politicas-ingenieria.md`](docs/politicas-ingenieria.md)
+- **Respaldos multi-proveedor:** [`docs/respaldos.md`](docs/respaldos.md)
 
 ## Arranque rápido (cuando el paso 1 esté hecho)
 
@@ -20,7 +23,7 @@ docker compose exec web python manage.py cargar_semillas
 
 ## Stack
 
-Django 5.2 LTS · Django REST Framework · HTMX · PostgreSQL 16 + pgvector · SeaweedFS (S3) · Docker Compose.
+Django 5.2 LTS · Django REST Framework · HTMX · PostgreSQL 17 + pgvector · SeaweedFS (S3) · Docker Compose.
 
 ## Datos
 

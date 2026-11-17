@@ -1,6 +1,6 @@
 # CLAUDE.md — instrucciones para construir el prototipo
 
-Lee `SPEC.md` completo antes de escribir código. Es la fuente de verdad; si algo falta o se contradice, pregunta en vez de inventar.
+Lee `SPEC.md`, `docs/seguridad.md`, `docs/politicas-ingenieria.md` y `docs/respaldos.md` antes de escribir código. Es la fuente de verdad; si algo falta o se contradice, pregunta en vez de inventar.
 
 ## Idioma y estilo
 - Código, modelos y campos en español (como en SPEC.md); comentarios breves en español.
@@ -9,15 +9,17 @@ Lee `SPEC.md` completo antes de escribir código. Es la fuente de verdad; si alg
 - Cada transición: `transaction.atomic()` + registro en `Bitacora` + inserción en `EventoOutbox`, todo en la misma transacción.
 
 ## Orden de trabajo (un commit por paso, pruebas incluidas)
-1. Esqueleto: `pyproject.toml`, `config/settings/{base,dev,prod}.py` con `django-environ`, `Dockerfile` multi-etapa (usuario no root), `docker-compose.yml` funcionando, `/api/v1/salud/`.
+1. Esqueleto: `pyproject.toml` con `uv` y `uv.lock`, `config/settings/{base,dev,prod}.py` con `django-environ`, `Dockerfile` multi-etapa (usuario no root), `docker-compose.yml` funcionando, `/api/v1/salud/`.
 2. `apps/core`: modelos, admin, semillas sintéticas (`seeds/`), servicio `cargos_vigentes`.
+2b. `apps/seguridad`: 2FA (TOTP), `django-axes`, sesiones, servicio `puede(...)` con pruebas por rol × acción × clasificación (docs/seguridad.md).
 3. `apps/auditoria` (con trigger append-only) y `apps/eventos` (outbox + comando `procesar_eventos --loop`).
 4. `apps/archivos`: storage S3 (`django-storages`), hash SHA-256, validación de tipo/tamaño.
 5. `apps/correspondencia`: modelos, secuencia CITE con bloqueo, servicios de transición, reglas de la sección 6.
 6. `apps/api`: endpoints de la sección 8 + OpenAPI.
 7. UI HTMX (sección 9) y `apps/tablero`.
 8. `apps/importacion`: comando del Excel histórico con Excel sintético de prueba.
-9. `scripts/backup.sh` y `scripts/restore.sh` con `restic`; CI en GitHub Actions.
+9. `docker/backup/Dockerfile`, `scripts/backup.sh` y `scripts/restore.sh` multi-destino (restic + rclone) según docs/respaldos.md; CI en GitHub Actions con los controles de docs/seguridad.md §3 y docs/politicas-ingenieria.md §5.
+10. `docs/` completos (MkDocs), `docs/asvs-matriz.md`, `docs/incidentes.md`, ADR iniciales en `docs/adr/` (uno por cada ADR de SPEC.md §3).
 
 ## Comandos esperados
 ```
