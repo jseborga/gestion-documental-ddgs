@@ -310,7 +310,17 @@ Servicios (ver `docker-compose.yml`):
 | 5 | Correspondencia entre instituciones (cápsula + recepción idempotente) vía Plataforma de Interoperabilidad de AGETIC o X-Road. |
 | 6 | Vínculo con POA (operación por expediente) y trazabilidad de dotación/activos, referenciando SIGEP/SEGUIPOA/Activos Fijos por código. |
 
-## 16. Preguntas abiertas (no bloquean el prototipo)
+## 16. Producto reutilizable y entrega a la institución
+
+El sistema se desarrolla como producto propio del proveedor, se entrega (cede o licencia) a la Gobernación y se sostiene con un contrato de mantenimiento. Por eso:
+
+1. **Nada institucional en el código.** Nombre de la entidad, siglas, prefijo de CITE, logos, plantillas y textos legales se configuran en base de datos o variables de entorno (`INSTITUCION_NOMBRE`, `INSTITUCION_SIGLA`, logo cargable). El mismo código debe poder instalarse en otra gobernación o municipio sin cambios.
+2. **Licencia explícita** en `LICENSE` según lo que se acuerde en el contrato (ver opciones en la nota comercial; por defecto AGPL-3.0 con titularidad del proveedor). Encabezado de copyright en cada archivo fuente.
+3. **Paquete de entrega** (en `docs/`): manual de usuario por rol, manual técnico (arquitectura, modelo de datos, API), manual de instalación y actualización, procedimiento de respaldo y restauración, plan de continuidad, registro de cambios (`CHANGELOG.md`, versionado semántico).
+4. **Versiones etiquetadas** (`v0.1.0`, …) y notas de versión por cada entrega, para facturar y aceptar entregas contra criterios verificables.
+5. **Migraciones de datos reversibles** y probadas, para que las actualizaciones del contrato de mantenimiento sean de bajo riesgo.
+
+## 17. Preguntas abiertas (no bloquean el prototipo)
 
 - ¿La numeración de HR es única para toda la Gobernación? ¿Qué sistema la genera?
 - Sigla vigente: ¿DDGS o DDS? Prefijo de CITE exacto.

@@ -28,6 +28,10 @@ docker compose exec web pytest
 docker compose exec web python manage.py importar_registro_excel --archivo /datos/registro.xlsx --anio 2026 --unidad DDGS --dry-run
 ```
 
+## Producto reutilizable (SPEC.md §16)
+- Ningún nombre, sigla o logo institucional fijo en el código: todo configurable.
+- Mantener `docs/` (manuales), `CHANGELOG.md` y etiquetas de versión al cerrar cada paso.
+
 ## Prohibido
 - Subir datos reales (Excel del registro, nombres de funcionarios, `alias.csv`, `.env`).
 - Calcular el CITE con `MAX()+1` o fuera de una transacción con bloqueo.
