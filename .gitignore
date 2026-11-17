@@ -1,0 +1,25 @@
+# Secretos y datos reales: NUNCA al repositorio
+.env
+*.xlsx
+*.xls
+alias.csv
+datos/
+respaldos/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Django
+staticfiles/
+media/
+
+# Editor / SO
+.DS_Store
+.idea/
+.vscode/
