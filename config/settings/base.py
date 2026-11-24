@@ -30,6 +30,8 @@ env = environ.Env(
     CSP_IMG_SRC_EXTRA=(list, []),
     INSTITUTOS_ZONA=(list, ["-18.6", "-10.4", "-70.0", "-66.4"]),
     MAPA_TESELAS_URL=(str, ""),
+    INSTITUTOS_TITULAR_PATRONES=(list, ["gobierno autonomo"]),
+    IMPORTACION_MAX_MB=(int, 10),
     MAPA_TESELAS_ATRIBUCION=(str, ""),
 )
 environ.Env.read_env(BASE_DIR / ".env", overwrite=False)
@@ -216,6 +218,10 @@ INSTITUTOS_ZONA = [float(v) for v in env("INSTITUTOS_ZONA")]
 # OpenStreetMap: https://tile.openstreetmap.org/{z}/{x}/{y}.png y agregar su dominio a
 # CSP_IMG_SRC_EXTRA. Respetar la política de uso del proveedor.
 MAPA_TESELAS_URL = env("MAPA_TESELAS_URL")
+# Textos que, en el derecho propietario de la ficha, indican que el inmueble está a nombre
+# de la entidad (se comparan sin tildes y en mayúsculas).
+INSTITUTOS_TITULAR_PATRONES = env("INSTITUTOS_TITULAR_PATRONES")
+IMPORTACION_MAX_MB = env("IMPORTACION_MAX_MB")
 MAPA_TESELAS_ATRIBUCION = env("MAPA_TESELAS_ATRIBUCION")
 
 # Datos de la institución (SPEC §16: nada institucional fijo en el código)
