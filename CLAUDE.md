@@ -8,6 +8,8 @@ Lee `SPEC.md`, `docs/seguridad.md`, `docs/politicas-ingenieria.md` y `docs/respa
 - Lógica de negocio solo en `apps/*/services.py`. Views, serializers y admin llaman a servicios; nunca cambian estados directamente.
 - Cada transición: `transaction.atomic()` + registro en `Bitacora` + inserción en `EventoOutbox`, todo en la misma transacción.
 
+Lee también `docs/levantamiento-2026-11.md`: sus ajustes A1-A18 prevalecen sobre SPEC.md donde difieran.
+
 ## Orden de trabajo (un commit por paso, pruebas incluidas)
 1. Esqueleto: `pyproject.toml` con `uv` y `uv.lock`, `config/settings/{base,dev,prod}.py` con `django-environ`, `Dockerfile` multi-etapa (usuario no root), `docker-compose.yml` funcionando, `/api/v1/salud/`.
 2. `apps/core`: modelos, admin, semillas sintéticas (`seeds/`), servicio `cargos_vigentes`.

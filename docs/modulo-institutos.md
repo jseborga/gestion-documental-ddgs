@@ -95,3 +95,23 @@ Inversión por región y por estudiante; proyectos por estado; institutos con ob
 3. La ficha muestra proyectos, inversiones, estado legal y correspondencia vinculada, con totales calculados.
 4. Un técnico puede fijar o corregir la ubicación desde el celular, y el cambio queda en bitácora.
 5. El GeoJSON público del mapa no contiene teléfonos ni nombres de autoridades.
+
+## 10. Trámites del Decreto Departamental 100 (2017)
+
+Base normativa del módulo: la Disposición Final Tercera encarga a la Dirección una base de datos de institutos fiscales y de convenio "con el objeto de contar con mecanismos de control". Vigencia y equivalencia de nombres de unidades **a confirmar** (ver `docs/levantamiento-2026-11.md` §6).
+
+Cada trámite se carga como `TipoTramite` (requisitos como lista de verificación, etapas con plazo y tipo de días). Los plazos son los del texto recibido:
+
+| Trámite | Artículos | Etapas y plazos |
+| --- | --- | --- |
+| Certificación de Factibilidad Técnica: apertura de instituto fiscal | 11-13 | Verificación de requisitos 5 días hábiles → inspección → informe técnico 10 días hábiles tras la inspección → informe legal de la Secretaría → Resolución Secretarial 5 días hábiles. Subsanación: 15 días hábiles o se tiene por desistida |
+| Certificación de Factibilidad Técnica: ampliación de carreras | 14-16 | Verificación 10 días hábiles → inspección → informe técnico 10 días hábiles → informe legal → Resolución Secretarial o nota de rechazo 5 días hábiles. Subsanación 15 días hábiles. Institutos de convenio: según su convenio |
+| Servicios básicos | 18-19 | Verificación de requisitos y remisión a Economía y Finanzas. Sin plazos fijados |
+| Infraestructura: construcción, refacción, ampliación | 20-22 | Verificación → inspección en 20 días hábiles → informe de factibilidad técnica, social y económica en 30 días calendario → aprobación e informe legal de la Secretaría 5 días hábiles → programación presupuestaria → Informe Técnico de Condiciones Previas aprobado por la MAE |
+| Equipamiento y mobiliario | 25-26 | Verificación 5 días hábiles; subsanación 15 días calendario o no presentada → informe de viabilidad (total o parcial) o rechazo en 20 días hábiles → aprobación de la Secretaría → la Dirección es Unidad Solicitante de la contratación |
+| Asignación de activos al instituto | 27 | Solicitud de la Dirección → Unidad de Manejo de Bienes: Formulario de Asignación de Activos codificados y Acta de Entrega firmada por la MAE del instituto → copia legalizada a la Dirección. Reversión y reasignación con informes técnico y legal |
+| Material educativo | 30-32 | Informe de viabilidad en 15 días hábiles → aprobación de la Secretaría → contratación → entrega por Almacén Central con Acta de Entrega de Material → descargos del instituto |
+
+**Regla de elegibilidad (art. 20.II):** para proyectos de inversión el GADLP debe tener el derecho propietario registrado en Derechos Reales y en catastro municipal. Si no, solo cabe un convenio interinstitucional con plazos de saneamiento (art. 24.III). La ficha muestra el indicador "Apto para inversión en infraestructura" calculado desde `DerechoPropietario`. Contraste con los datos actuales: los 21 proyectos de construcción y refacción registrados 2021-2025 están en institutos con derecho propietario a nombre del GADLP; los 28 institutos sin ese registro no tienen obras registradas.
+
+**Requisitos que se repiten** en casi todos los trámites y conviene guardar una sola vez en la ficha (con vigencia): designación de la máxima autoridad ejecutiva del instituto, Resolución Ministerial de apertura y funcionamiento, Folio Real a nombre del GADLP, certificado catastral y plano georreferenciado, Certificación de Factibilidad Técnica de apertura y, para institutos de convenio, el convenio vigente. Al iniciar un trámite, el sistema marca como cumplidos los requisitos que ya están vigentes en la ficha.

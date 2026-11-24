@@ -35,7 +35,9 @@ Reemplazar el Excel en la DDGS con un sistema web que:
 - Catálogos: unidades, cargos, personas, ocupación de cargos, instituciones externas, proyectos, procesos, tipos de documento.
 - Expedientes, documentos, destinatarios, adjuntos, derivaciones.
 - Flujo: recepción → derivación → elaboración → revisión → firma (CITE) → despacho → archivo.
-- Envío masivo (una plantilla, N destinatarios, un CITE por destinatario).
+- Envío masivo: en comunicados, instructivos y circulares, un CITE con lista de destinatarios; en notas personalizadas, un CITE por destinatario (configurable por tipo). Seguimiento de quién respondió.
+- Registro de garantías de obra con alertas a 15 y 5 días (adelanto de la fase 3).
+- Ajustes del levantamiento de noviembre de 2026: ver `docs/levantamiento-2026-11.md` §2 (A1-A18). En caso de conflicto, ese documento prevalece sobre esta especificación hasta que se integre aquí.
 - Bandeja por cargo, búsqueda, tablero básico.
 - Bitácora inmutable y outbox de eventos.
 - Importación del Excel histórico 2026 (comando de gestión).
@@ -187,7 +189,7 @@ Entidades `Instituto`, `Ubicacion`, `AutoridadInstituto`, `ResolucionMinisterial
 7. **Firma**: solo una persona con ocupación vigente en un cargo con `puede_firmar=True` igual a `cargo_firmante`. Requiere adjunto principal PDF.
 8. **Despacho**: ventanilla registra fecha de despacho; para externos, se guarda constancia (texto o adjunto).
 9. **Respuesta**: un documento con `responde_a` cierra automáticamente la derivación que originó la respuesta, si existe.
-10. **Envío masivo**: un CITE por destinatario, mismo asunto y plantilla; queda agrupado por `EnvioMasivo` para no contaminar los indicadores.
+10. **Envío masivo**: según `TipoDocumento.cite_por_destinatario`: comunicados, instructivos y circulares llevan un solo CITE con lista de destinatarios; notas personalizadas, un CITE por destinatario. Queda agrupado por `EnvioMasivo` para no contaminar los indicadores y para seguir quién respondió.
 11. **Confidencialidad**: expedientes `confidencial=True` solo visibles para cargos derivados, director(a) y auditoría.
 12. **Histórico**: los documentos importados del Excel quedan `historico=True`, `estado=firmado`, con el CITE original, y **no** consumen la secuencia (inicializar `SecuenciaCite.ultimo` con el máximo importado por tipo).
 
