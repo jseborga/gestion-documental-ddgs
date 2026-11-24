@@ -178,6 +178,8 @@ class Proyecto(ModeloBase):
         OTRO = "otro", "Otro"
 
     class Estado(models.TextChoices):
+        SIN_DATO = "sin_dato", "Sin dato"
+        PROGRAMADO = "programado", "Programado (por ejecutar)"
         PREINVERSION = "preinversion", "Preinversión"
         CONTRATACION = "contratacion", "Contratación"
         EN_EJECUCION = "en_ejecucion", "En ejecución"
@@ -188,6 +190,7 @@ class Proyecto(ModeloBase):
             "concluida_sin_cierre_financiero",
             "Concluida sin cierre financiero",
         )
+        CONCLUIDA = "concluida", "Concluida"
         CERRADA = "cerrada", "Cerrada"
 
     unidad = models.ForeignKey(Unidad, on_delete=models.PROTECT, related_name="proyectos")
@@ -210,6 +213,9 @@ class Proyecto(ModeloBase):
     presupuesto_bs = models.DecimalField(max_digits=14, decimal_places=2, null=True, blank=True)
     ejecutado_bs = models.DecimalField(max_digits=14, decimal_places=2, null=True, blank=True)
     estado = models.CharField(max_length=35, choices=Estado.choices, default=Estado.PREINVERSION)
+    estado_detalle = models.TextField(
+        blank=True, help_text="Texto del estado tal como llegó de la fuente."
+    )
     cargo_fiscal = models.ForeignKey(
         Cargo,
         null=True,

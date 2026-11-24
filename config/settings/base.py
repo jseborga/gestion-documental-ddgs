@@ -28,6 +28,9 @@ env = environ.Env(
     RESPALDO_VIGILAR=(bool, False),
     RESPALDO_ALERTA_HORAS=(int, 26),
     CSP_IMG_SRC_EXTRA=(list, []),
+    INSTITUTOS_ZONA=(list, ["-18.6", "-10.4", "-70.0", "-66.4"]),
+    MAPA_TESELAS_URL=(str, ""),
+    MAPA_TESELAS_ATRIBUCION=(str, ""),
 )
 environ.Env.read_env(BASE_DIR / ".env", overwrite=False)
 
@@ -55,6 +58,7 @@ INSTALLED_APPS = [
     "apps.auditoria",
     "apps.eventos",
     "apps.seguridad",
+    "apps.institutos",
     "apps.api",
 ]
 
@@ -203,6 +207,16 @@ AXES_RESET_ON_SUCCESS = True
 AXES_LOCKOUT_TEMPLATE = "seguridad/bloqueado.html"
 AXES_CLIENT_IP_CALLABLE = "apps.seguridad.red.ip_cliente"
 AXES_VERBOSE = False
+
+# Mapa e institutos
+# Zona de trabajo para validar coordenadas: lat_min, lat_max, lon_min, lon_max
+# (por defecto, un rectángulo que contiene el departamento de La Paz).
+INSTITUTOS_ZONA = [float(v) for v in env("INSTITUTOS_ZONA")]
+# Servidor de teselas del mapa base. Vacío = mapa sin fondo (solo puntos). Para usar
+# OpenStreetMap: https://tile.openstreetmap.org/{z}/{x}/{y}.png y agregar su dominio a
+# CSP_IMG_SRC_EXTRA. Respetar la política de uso del proveedor.
+MAPA_TESELAS_URL = env("MAPA_TESELAS_URL")
+MAPA_TESELAS_ATRIBUCION = env("MAPA_TESELAS_ATRIBUCION")
 
 # Datos de la institución (SPEC §16: nada institucional fijo en el código)
 INSTITUCION_NOMBRE = env("INSTITUCION_NOMBRE")

@@ -12,7 +12,7 @@ from apps.auditoria import services as bitacora
 from apps.eventos import services as eventos
 
 from . import selectors
-from .models import Cargo, OcupacionCargo, Persona
+from .models import Cargo, InstitucionExterna, OcupacionCargo, Persona, Proyecto, Unidad
 
 
 @transaction.atomic
@@ -100,3 +100,47 @@ def terminar_ocupacion(
         payload={"hasta": hasta},
     )
     return ocupacion
+
+
+@transaction.atomic
+def guardar_institucion(*, codigo: str, actor=None, **datos) -> tuple[InstitucionExterna, bool]:
+    """Crea o actualiza una institución externa por su código, con bitácora."""
+    existente = InstitucionExterna.objects.select_for_update().filter(codigo=codigo).first()
+    antes = bitacora.instantanea(existente) if existente else None
+    institucion, creada = InstitucionExterna.objects.update_or_create(codigo=codigo, defaults=datos)
+    despues = bitacora.instantanea(institucion)
+    if creada or antes != despues:
+        bitacora.registrar(
+            accion="institucion_creada" if creada else "institucion_modificada",
+            actor=actor,
+            objeto=institucion,
+            antes=antes,
+            despues=despues,
+        )
+    return institucion, creada
+
+
+@transaction.atomic
+def guardar_proyecto(*, codigo: str, unidad: Unidad, actor=None, **datos) -> tuple[Proyecto, bool]:
+    """Crea o actualiza un proyecto por su código, con bitácora y evento."""
+    existente = Proyecto.objects.select_for_update().filter(codigo=codigo).first()
+    antes = bitacora.instantanea(existente) if existente else None
+    proyecto, creado = Proyecto.objects.update_or_create(
+        codigo=codigo, defaults={"unidad": unidad, **datos}
+    )
+    despues = bitacora.instantanea(proyecto)
+    if creado or antes != despues:
+        bitacora.registrar(
+            accion="proyecto_creado" if creado else "proyecto_modificado",
+            actor=actor,
+            objeto=proyecto,
+            antes=antes,
+            despues=despues,
+        )
+        eventos.publicar(
+            tipo="core.proyecto_guardado",
+            agregado="proyecto",
+            agregado_id=proyecto.pk,
+            payload={"codigo": codigo, "estado": proyecto.estado},
+        )
+    return proyecto, creado
