@@ -4,6 +4,13 @@ Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/); versionado
 
 ## [Sin publicar]
 
+### Seguridad (auditoría D1, `docs/auditoria-2026-11-24.md`)
+- SeaweedFS: componentes internos solo en `127.0.0.1`; solo la API S3 con credenciales en la red.
+- EasyPanel: `web` y `worker` fuerzan la configuración de producción.
+- Inicio de sesión fallido: sin error 500 con usuarios largos y sin guardar lo tecleado si no es un usuario existente.
+- Nadie cambia sus propios roles ni se asigna cargos; alerta por cambios de rol privilegiado.
+- `backup.sh`: valida nombres de destino.
+
 ### Corregido
 - SeaweedFS escuchaba solo en la IP del contenedor (`-ip.bind` vacío usa `-ip`), por lo que la verificación de salud en `localhost` fallaba y `s3` quedaba *unhealthy*. Ahora escucha en `0.0.0.0` y la verificación tiene 30 s de gracia al arrancar.
 

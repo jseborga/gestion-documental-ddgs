@@ -63,6 +63,11 @@ IFS=',' read -r -a DESTINOS <<<"$BACKUP_DESTINOS"
 for destino in "${DESTINOS[@]}"; do
   destino="${destino// /}"
   [[ -z "$destino" ]] && continue
+  if [[ ! "$destino" =~ ^[A-Za-z0-9_]+$ ]]; then
+    echo "ERROR: nombre de destino no válido: '${destino}' (solo letras, números y _)" >&2
+    fallidos+=("invalido")
+    continue
+  fi
   repo=$(valor_de RESTIC_REPOSITORY "$destino")
   clave=$(valor_de RESTIC_PASSWORD "$destino")
   if [[ -z "$repo" || -z "$clave" ]]; then

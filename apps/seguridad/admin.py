@@ -7,6 +7,7 @@ from django.contrib.auth.models import Group
 
 from apps.auditoria import services as bitacora
 
+from . import services
 from .permisos import Accion, puede
 from .red import ip_cliente
 
@@ -47,6 +48,8 @@ class UsuarioAdmin(UserAdmin):
         if not request.user.is_superuser:
             # Evita la escalada de privilegios desde el rol administrador.
             campos += ["is_superuser", "user_permissions", "is_staff", "last_login", "date_joined"]
+            if obj is not None and obj.pk == request.user.pk:
+                campos += ["groups", "is_active"]  # nadie cambia sus propios roles
         return campos
 
     def save_model(self, request, obj, form, change):
@@ -69,6 +72,13 @@ class UsuarioAdmin(UserAdmin):
         super().save_related(request, form, formsets, change)
         despues = sorted(form.instance.groups.values_list("name", flat=True))
         if antes != despues:
+            privilegiados = {"administrador", "director", "auditor"}
+            if (set(antes) ^ set(despues)) & privilegiados:
+                services.alertar(
+                    "Cambio de rol privilegiado",
+                    f"'{request.user.get_username()}' cambió los roles de "
+                    f"'{form.instance.get_username()}': {antes} -> {despues}.",
+                )
             bitacora.registrar_seguridad(
                 accion="roles_modificados",
                 actor=request.user,

@@ -305,3 +305,62 @@ class TestIpCliente:
     @override_settings(PROXIES_CONFIABLES=1)
     def test_valor_invalido(self):
         assert ip_cliente(self._req("no-es-ip")) is None
+
+
+class TestHallazgosAuditoria:
+    """Regresiones de la auditoría de seguridad del 24/11/2026."""
+
+    def test_usuario_largo_no_rompe_el_inicio(self, client):
+        respuesta = entrar(client, "x" * 140, "y")
+        assert respuesta.status_code == 200  # formulario con error, no 500
+
+    def test_no_guarda_lo_tecleado_si_no_es_usuario(self, client):
+        entrar(client, "MiClaveSecreta2026", "x")
+        registro = Bitacora.objects.filter(accion="inicio_sesion_fallido").latest("id")
+        assert registro.objeto_id == "desconocido"
+        assert "MiClaveSecreta2026" not in str(registro.__dict__)
+
+    def test_guarda_id_de_usuario_existente(self, client):
+        u = usuario(rol="tecnico")
+        entrar(client, "ana", "incorrecta")
+        assert Bitacora.objects.filter(accion="inicio_sesion_fallido", objeto_id=str(u.pk)).exists()
+
+    def test_administrador_no_cambia_sus_propios_roles(self, client):
+        admin = usuario("adm", rol="administrador")
+        verificar_cliente(client, admin)
+        director = Group.objects.get(name="director")
+        client.post(
+            f"/admin/auth/user/{admin.pk}/change/",
+            {"username": "adm", "is_active": "on", "groups": [director.pk]},
+        )
+        assert not admin.groups.filter(name="director").exists()
+
+    def test_administrador_no_se_asigna_cargos(self, client):
+        admin = usuario("adm", rol="administrador")
+        persona = Persona.objects.create(nombres="Adm", apellidos="X", usuario=admin)
+        unidad = Unidad.objects.create(sigla="UQ", nombre="U")
+        cargo = Cargo.objects.create(
+            unidad=unidad, codigo="UQ-DIR", nombre="Dir", puede_firmar=True
+        )
+        verificar_cliente(client, admin)
+        respuesta = client.post(
+            "/admin/core/ocupacioncargo/add/",
+            {"persona": persona.pk, "cargo": cargo.pk, "tipo": "titular", "desde": "2026-01-01"},
+        )
+        assert respuesta.status_code == 200
+        assert "a sí mismo" in respuesta.content.decode()
+
+    @override_settings(ALERTAS_EMAIL=["admin@ejemplo.invalid"])
+    def test_alerta_al_dar_rol_privilegiado(self, client):
+        admin = usuario("adm", rol="administrador")
+        verificar_cliente(client, admin)
+        objetivo = usuario("beto", rol="tecnico")
+        client.post(
+            f"/admin/auth/user/{objetivo.pk}/change/",
+            {
+                "username": "beto",
+                "is_active": "on",
+                "groups": [Group.objects.get(name="director").pk],
+            },
+        )
+        assert any("rol privilegiado" in m.subject for m in mail.outbox)

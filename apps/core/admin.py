@@ -95,8 +95,19 @@ class OcupacionCargoForm(forms.ModelForm):
         model = OcupacionCargo
         fields = ["persona", "cargo", "tipo", "desde", "hasta", "acto_designacion"]
 
+    usuario_actual = None  # lo fija el admin para impedir autoasignaciones
+
     def clean(self):
         datos = super().clean()
+        persona = datos.get("persona")
+        usuario = self.usuario_actual
+        if (
+            persona is not None
+            and usuario is not None
+            and not usuario.is_superuser
+            and persona.usuario_id == usuario.pk
+        ):
+            raise forms.ValidationError("No puede asignarse cargos a sí mismo.")
         cargo, tipo = datos.get("cargo"), datos.get("tipo")
         desde, hasta = datos.get("desde"), datos.get("hasta")
         if (
@@ -116,6 +127,11 @@ class OcupacionCargoAdmin(CatalogoAdmin):
     list_filter = ["tipo", "cargo__unidad"]
     search_fields = ["persona__apellidos", "cargo__nombre", "acto_designacion"]
     date_hierarchy = "desde"
+
+    def get_form(self, request, obj=None, **kwargs):
+        formulario = super().get_form(request, obj, **kwargs)
+        formulario.usuario_actual = request.user
+        return formulario
 
     def get_readonly_fields(self, request, obj=None):
         # Una ocupación registrada solo se cierra (fecha final); el resto queda como historia.

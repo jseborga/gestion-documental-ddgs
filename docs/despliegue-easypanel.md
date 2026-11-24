@@ -2,7 +2,7 @@
 
 Se despliega como un servicio **Compose** con el archivo `docker-compose.easypanel.yml`: base de datos (PostgreSQL 17 + pgvector), almacenamiento (SeaweedFS), aplicación web y procesador de eventos quedan juntos, igual que en la prueba automática de CI.
 
-> Estado actual (v0.1, pasos 1-2): solo están disponibles el panel de administración y `/api/v1/salud/`. Sirve para validar la infraestructura, **no para cargar datos reales**: todavía no hay respaldos automáticos (paso 9) y el lugar de alojamiento para datos reales lo debe aprobar la Unidad de Sistemas.
+> Estado actual (etapa D1): inicio de sesión con segundo factor, bloqueo por intentos, bitácora inalterable, eventos y respaldo diario cifrado. Antes de cargar datos reales, cumplir la lista «Antes de usar datos reales» de abajo.
 
 ## Requisitos
 
@@ -33,7 +33,15 @@ Se despliega como un servicio **Compose** con el archivo `docker-compose.easypan
    S3_SECRET_KEY=<clave aleatoria larga>
    INSTITUCION_NOMBRE=<nombre de la institución>
    INSTITUCION_SIGLA=<sigla>
+   BACKUP_DESTINOS=local
+   RESTIC_PASSWORD_local=<clave larga; guardarla FUERA del servidor: sin ella el respaldo es irrecuperable>
+   ALERTAS_EMAIL=<correo del administrador>
+   EMAIL_URL=smtp+tls://usuario:clave@servidor-smtp:587
+   MFA_OBLIGATORIO_TODOS=True
    ```
+
+   - `DJANGO_SETTINGS_MODULE` no hace falta: el Compose de EasyPanel fuerza producción.
+   - `PROXIES_CONFIABLES` vale 1 en producción (Traefik de EasyPanel); no cambiarlo salvo otra topología.
 
    - `DJANGO_ALLOWED_HOSTS` lleva solo el nombre del dominio (sin `https://` ni `/`) y debe incluir `localhost`, que usa la verificación de salud interna.
    - `CSRF_TRUSTED_ORIGINS` lleva `https://` y **no** lleva puerto (`:8000` es interno).
@@ -82,7 +90,11 @@ Asignar un dominio con HTTPS al propio panel de EasyPanel. Entrar por `http://IP
 
 ## Antes de usar datos reales
 
-- Respaldo automático cifrado operativo (paso 9) y probado con una restauración.
+- Base recreada con clave propia (no la de ejemplo) y `RESTIC_PASSWORD_local` custodiada fuera del servidor.
+- Correo SMTP configurado y `ALERTAS_EMAIL` definido (si no, las alertas solo quedan en los registros).
+- Segundo factor activado por cada usuario privilegiado en presencia del administrador (auditoría D1, hallazgo 9).
+- Un respaldo manual ejecutado y restaurado en una base de prueba.
+- Respaldo automático cifrado operativo y probado con una restauración.
 - Versiones de imágenes fijadas (sin `latest`).
 - Servidor aprobado por la Unidad de Sistemas y el Responsable de Seguridad (levantamiento A16).
 - Autorización escrita del Director para cargar el registro 2026.

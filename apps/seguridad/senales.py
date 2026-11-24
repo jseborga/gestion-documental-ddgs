@@ -53,9 +53,17 @@ def al_cerrar_sesion(sender, request, user, **kwargs):
 
 @receiver(user_login_failed)
 def al_fallar_inicio(sender, credentials, request=None, **kwargs):
-    usuario = str(credentials.get("username", ""))[:150]
+    # Solo se guarda el id de un usuario existente: lo tecleado puede ser una contraseña
+    # escrita por error en el campo de usuario, o un texto largo para provocar errores.
+    tecleado = str(credentials.get("username", ""))[:150]
+    existente = (
+        get_user_model().objects.filter(username=tecleado).values_list("pk", flat=True).first()
+    )
     bitacora.registrar_seguridad(
-        accion="inicio_sesion_fallido", objeto_tipo="usuario", objeto_id=usuario, ip=_ip(request)
+        accion="inicio_sesion_fallido",
+        objeto_tipo="usuario",
+        objeto_id=existente if existente is not None else "desconocido",
+        ip=_ip(request),
     )
     fallos = bitacora_lectura.contar_recientes("inicio_sesion_fallido", VENTANA_MINUTOS)
     alerta_reciente = bitacora_lectura.contar_recientes("alerta_fallos_sesion", VENTANA_MINUTOS)
@@ -69,10 +77,16 @@ def al_fallar_inicio(sender, credentials, request=None, **kwargs):
 
 @receiver(user_locked_out)
 def al_bloquear(sender, request, username, ip_address, **kwargs):
+    existente = (
+        get_user_model()
+        .objects.filter(username=str(username or "")[:150])
+        .values_list("pk", flat=True)
+        .first()
+    )
     bitacora.registrar_seguridad(
         accion="cuenta_bloqueada_por_intentos",
         objeto_tipo="usuario",
-        objeto_id=str(username or "")[:40],
+        objeto_id=existente if existente is not None else "desconocido",
         ip=ip_address,
     )
 
