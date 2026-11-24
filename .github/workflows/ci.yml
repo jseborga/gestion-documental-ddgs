@@ -30,6 +30,11 @@ jobs:
       - uses: astral-sh/setup-uv@v6
         with:
           python-version: "3.12"
+      - name: Sin archivos de datos reales versionados
+        run: |
+          if git ls-files | grep -Ei '\.(xlsx|xlsm|xls|csv|dump|sql\.gz)$' | grep -v '^tests/fixtures/'; then
+            echo "Hay archivos de datos en el repositorio"; exit 1
+          fi
       - name: Dependencias (desde uv.lock)
         run: uv sync --frozen
       - name: Formato y lint

@@ -47,4 +47,5 @@ docker compose exec web python manage.py importar_registro_excel --archivo /dato
 - Microservicios, colas externas o frameworks de frontend SPA en el MVP.
 
 ## Definición de terminado
+Cada paso pasa la puerta de `docs/mapa-implementacion.md` §1 (`scripts/verificar.sh` + revisión de amenazas) antes de darse por terminado.
 Los 7 criterios de la sección 14 de SPEC.md se cumplen y están demostrados con pruebas o con un paso documentado en README.

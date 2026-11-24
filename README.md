@@ -7,6 +7,7 @@ Prototipo de sistema de correspondencia para la Dirección de Desarrollo y Gesti
 - **Seguridad:** [`docs/seguridad.md`](docs/seguridad.md) · [`SECURITY.md`](SECURITY.md)
 - **Políticas de ingeniería:** [`docs/politicas-ingenieria.md`](docs/politicas-ingenieria.md)
 - **Respaldos multi-proveedor:** [`docs/respaldos.md`](docs/respaldos.md)
+- **Mapa de implementación (pasos y puertas de control):** [`docs/mapa-implementacion.md`](docs/mapa-implementacion.md) · verificación local: `scripts/verificar.sh`
 - **Plan general (módulos y orden del demo):** [`docs/plan-general.md`](docs/plan-general.md)
 - **Levantamiento y ajustes al MVP:** [`docs/levantamiento-2026-11.md`](docs/levantamiento-2026-11.md) · **Módulo Institutos:** [`docs/modulo-institutos.md`](docs/modulo-institutos.md)
 
