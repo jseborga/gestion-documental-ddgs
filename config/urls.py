@@ -12,6 +12,7 @@ admin.site.site_title = "Administración"
 urlpatterns = [
     path("", seguridad_views.inicio, name="inicio"),
     path("seguridad/", include("apps.seguridad.urls")),
+    path("institutos/", include("apps.institutos.urls")),
     path("admin/", admin.site.urls),
     path("api/v1/", include("apps.api.urls")),
 ]

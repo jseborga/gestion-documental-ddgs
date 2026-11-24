@@ -5,12 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block titulo %}Gestión documental{% endblock %}</title>
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  {% block cabecera %}{% endblock %}
 </head>
 <body>
   <header class="barra">
     <a class="marca" href="/">Gestión documental</a>
     {% if user.is_authenticated %}
       <nav>
+        <a href="{% url 'institutos:lista' %}">Institutos</a>
+        <a href="{% url 'institutos:mapa' %}">Mapa</a>
         <a href="{% url 'seguridad:mis_sesiones' %}">Mis sesiones</a>
         {% if user.is_staff %}<a href="/admin/">Administración</a>{% endif %}
         <form method="post" action="{% url 'seguridad:salir' %}" class="en-linea">
@@ -25,5 +28,6 @@
     {% endfor %}
     {% block contenido %}{% endblock %}
   </main>
+  {% block scripts %}{% endblock %}
 </body>
 </html>

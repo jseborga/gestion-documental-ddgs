@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load static %}
+{% block titulo %}Mapa de institutos{% endblock %}
+{% block cabecera %}<link rel="stylesheet" href="{% static 'vendor/leaflet/leaflet.css' %}">{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <h1>Mapa de institutos</h1>
+  <a class="boton" href="{% url 'institutos:lista' %}?{{ parametros }}">Ver en lista</a>
+</div>
+{% include "institutos/_filtros.html" %}
+<p class="leyenda">{% for clave, texto in semaforo.items %}<span class="punto {{ clave }}"></span> {{ texto }} {% endfor %}<span class="punto aproximada"></span> Ubicación aproximada</p>
+<div id="mapa" class="mapa"
+     data-geojson="{% url 'institutos:geojson' %}?{{ parametros }}"
+     data-teselas="{{ teselas }}"
+     data-atribucion="{{ atribucion }}"></div>
+{% if not teselas %}<p class="nota">Mapa sin fondo: el administrador puede configurar un servidor de teselas (MAPA_TESELAS_URL).</p>{% endif %}
+<p>{{ con_ubicacion }} institutos con ubicación.</p>
+{% if sin_ubicar %}
+<section class="tarjeta">
+  <h2>Sin ubicación registrada ({{ sin_ubicar|length }})</h2>
+  <ul class="columnas">{% for inst in sin_ubicar %}<li><a href="{% url 'institutos:ficha' inst.pk %}#ubicacion">{{ inst.numero|default:"" }} {{ inst.nombre }}</a></li>{% endfor %}</ul>
+</section>
+{% endif %}
+{% endblock %}
+{% block scripts %}
+<script src="{% static 'vendor/leaflet/leaflet.js' %}"></script>
+<script src="{% static 'js/mapa_institutos.js' %}"></script>
+{% endblock %}

@@ -32,6 +32,9 @@ env = environ.Env(
     MAPA_TESELAS_URL=(str, ""),
     INSTITUTOS_TITULAR_PATRONES=(list, ["gobierno autonomo"]),
     IMPORTACION_MAX_MB=(int, 10),
+    NOMINATIM_CONTACTO=(str, ""),
+    INSTITUTOS_REGION_BUSQUEDA=(str, ""),
+    INSTITUTOS_PAIS=(str, "bo"),
     MAPA_TESELAS_ATRIBUCION=(str, ""),
 )
 environ.Env.read_env(BASE_DIR / ".env", overwrite=False)
@@ -48,6 +51,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.humanize",
     "rest_framework",
     "drf_spectacular",
     "django_filters",
@@ -222,6 +226,11 @@ MAPA_TESELAS_URL = env("MAPA_TESELAS_URL")
 # de la entidad (se comparan sin tildes y en mayúsculas).
 INSTITUTOS_TITULAR_PATRONES = env("INSTITUTOS_TITULAR_PATRONES")
 IMPORTACION_MAX_MB = env("IMPORTACION_MAX_MB")
+# Ubicación aproximada (comando aproximar_ubicaciones): correo de contacto exigido por
+# Nominatim, región que se agrega a la búsqueda (ej. "La Paz") y código de país.
+NOMINATIM_CONTACTO = env("NOMINATIM_CONTACTO")
+INSTITUTOS_REGION_BUSQUEDA = env("INSTITUTOS_REGION_BUSQUEDA")
+INSTITUTOS_PAIS = env("INSTITUTOS_PAIS")
 MAPA_TESELAS_ATRIBUCION = env("MAPA_TESELAS_ATRIBUCION")
 
 # Datos de la institución (SPEC §16: nada institucional fijo en el código)

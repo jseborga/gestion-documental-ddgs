@@ -19,3 +19,23 @@ button, .boton { margin-top: 1rem; padding: .55rem 1.1rem; background: var(--azu
 .codigos { columns: 2; font-size: 1.1rem; }
 .tabla { width: 100%; border-collapse: collapse; background: #fff; }
 .tabla th, .tabla td { border-bottom: 1px solid var(--borde); padding: .5rem; text-align: left; }
+.encabezado { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: .5rem; }
+.filtros { display: flex; flex-wrap: wrap; gap: .5rem 1rem; align-items: flex-end; background: #fff; border: 1px solid var(--borde); border-radius: 8px; padding: .75rem; margin-bottom: 1rem; }
+.filtros label { margin: 0; font-weight: 600; font-size: .9rem; }
+.filtros input, .filtros select { display: block; padding: .35rem; border: 1px solid var(--borde); border-radius: 6px; }
+.filtros button { margin-top: 0; }
+.enlace-sec { align-self: center; }
+.punto { display: inline-block; width: .8rem; height: .8rem; border-radius: 50%; vertical-align: middle; background: #1f4e79; }
+.punto.rojo { background: #c62828; } .punto.ambar { background: #f9a825; } .punto.gris { background: #757575; } .punto.verde { background: #2e7d32; }
+.punto.aproximada { background: transparent; border: 2px dashed #1f4e79; }
+.leyenda { font-size: .9rem; color: #444; }
+.mapa { height: 60vh; min-height: 360px; border: 1px solid var(--borde); border-radius: 8px; background: #eef2f6; }
+.mapa.pequeno { height: 300px; min-height: 0; margin-bottom: .75rem; }
+.numero { text-align: right; white-space: nowrap; }
+.paginas { display: flex; gap: 1rem; margin: 1rem 0; }
+.pestanas { display: flex; flex-wrap: wrap; gap: .25rem; margin-bottom: 1rem; }
+.pestanas a { padding: .4rem .7rem; background: #fff; border: 1px solid var(--borde); border-radius: 6px; text-decoration: none; }
+.datos { display: grid; grid-template-columns: max-content 1fr; gap: .35rem 1rem; }
+.datos dt { font-weight: 600; } .datos dd { margin: 0; }
+.columnas { columns: 2; }
+@media (max-width: 700px) { .datos { grid-template-columns: 1fr; } .columnas { columns: 1; } .tabla { font-size: .85rem; } }

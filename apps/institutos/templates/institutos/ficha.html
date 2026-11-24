@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% load static humanize %}
+{% block titulo %}{{ inst.nombre }}{% endblock %}
+{% block cabecera %}{% if puede_editar %}<link rel="stylesheet" href="{% static 'vendor/leaflet/leaflet.css' %}">{% endif %}{% endblock %}
+{% block contenido %}
+<p><a href="{% url 'institutos:lista' %}">← Institutos</a></p>
+<h1><span class="punto {{ color }}"></span> {{ inst.nombre }}</h1>
+<p class="nota">{{ estado_texto }}</p>
+<nav class="pestanas">
+  <a href="#resumen">Resumen</a><a href="#proyectos">Proyectos e inversiones</a><a href="#legal">Estado legal</a><a href="#academico">Matrícula y carreras</a><a href="#ubicacion">Ubicación</a><a href="#observaciones">Observaciones ({{ observaciones|length }})</a>
+</nav>
+
+<section id="resumen" class="tarjeta">
+  <h2>Resumen</h2>
+  <dl class="datos">
+    <dt>N°</dt><dd>{{ inst.numero|default:"—" }}{% if inst.es_subsede %} (subsede){% endif %}</dd>
+    <dt>Región / provincia / municipio</dt><dd>{{ inst.region }} / {{ inst.provincia }} / {{ inst.municipio }}</dd>
+    <dt>Dirección</dt><dd>{{ inst.direccion|default:"—" }}</dd>
+    <dt>Situación</dt><dd>{{ inst.situacion|default:"—" }}</dd>
+    <dt>Dependencia</dt><dd>{{ inst.get_dependencia_display }}{% if inst.dependencia_texto %} ({{ inst.dependencia_texto }}){% endif %}</dd>
+    <dt>Estudiantes (último dato)</dt><dd>{{ anotado.estudiantes|default:"—" }}</dd>
+    <dt>Inversión registrada</dt><dd>Bs {{ anotado.inversion_bs|floatformat:2|intcomma|default:"0" }}</dd>
+    {% if autoridades is not None %}
+      {% for a in autoridades %}<dt>{{ a.cargo }}</dt><dd>{{ a.nombre }}{% if a.telefono %} · {{ a.telefono }}{% endif %}</dd>{% empty %}<dt>Autoridad</dt><dd>Sin dato</dd>{% endfor %}
+    {% endif %}
+  </dl>
+</section>
+
+<section id="proyectos" class="tarjeta">
+  <h2>Proyectos e inversiones</h2>
+  <table class="tabla">
+    <thead><tr><th>Gestión</th><th>Tipo</th><th>Proyecto</th><th>Presupuesto (Bs)</th><th>Estado</th></tr></thead>
+    <tbody>
+    {% for p in proyectos %}
+      <tr><td>{{ p.gestion_inicio|default:"—" }}{% if p.gestion_fin and p.gestion_fin != p.gestion_inicio %}–{{ p.gestion_fin }}{% endif %}</td><td>{{ p.get_tipo_display }}</td><td>{{ p.nombre }}</td><td class="numero">{{ p.presupuesto_bs|floatformat:2|intcomma|default:"—" }}</td><td>{{ p.get_estado_display }}{% if p.estado_detalle %}<br><small>{{ p.estado_detalle }}</small>{% endif %}</td></tr>
+    {% empty %}<tr><td colspan="5">Sin proyectos registrados.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+  <p class="nota">El seguimiento de obras (planillas, garantías, órdenes de cambio) llega con el módulo de proyectos.</p>
+</section>
+
+<section id="legal" class="tarjeta">
+  <h2>Estado legal</h2>
+  <dl class="datos">
+    <dt>Resolución ministerial</dt><dd>{% for rm in inst.resoluciones.all %}{{ rm.texto }}{% if not forloop.last %}; {% endif %}{% empty %}Sin dato{% endfor %}</dd>
+    <dt>Derecho propietario</dt><dd>{% if derecho %}{{ derecho.get_estado_display }}{% if derecho.folio_real %} · Folio real {{ derecho.folio_real }}{% endif %}<br><small>{{ derecho.detalle }}</small>{% else %}Sin dato{% endif %}</dd>
+    <dt>Apto para inversión en infraestructura</dt><dd>{% if derecho and derecho.apto_para_inversion %}Sí{% else %}No: requiere saneamiento o convenio (DD 100, art. 20.II y 24.III){% endif %}</dd>
+  </dl>
+</section>
+
+<section id="academico" class="tarjeta">
+  <h2>Matrícula y carreras</h2>
+  <ul>{% for m in inst.matriculas.all %}<li>{{ m.anio }}{% if m.mes %}/{{ m.mes }}{% endif %}: {{ m.estudiantes }} estudiantes ({{ m.fuente }})</li>{% empty %}<li>Sin datos de matrícula.</li>{% endfor %}</ul>
+  <h3>Carreras</h3>
+  <ul class="columnas">{% for c in inst.carreras.all %}<li>{{ c.nombre }}</li>{% empty %}<li>Sin datos.</li>{% endfor %}</ul>
+  <h3>Techo presupuestario</h3>
+  <ul>{% for t in inst.techos.all %}<li>{{ t.gestion }}: Bs {{ t.monto_bs|floatformat:2|intcomma }}</li>{% empty %}<li>Sin datos.</li>{% endfor %}</ul>
+</section>
+
+<section id="ubicacion" class="tarjeta">
+  <h2>Ubicación</h2>
+  {% if inst.lat is not None %}
+    <p>{{ inst.lat }}, {{ inst.lon }} · {{ inst.get_precision_display }}</p>
+  {% else %}<p><strong>Pendiente.</strong></p>{% endif %}
+  {% if form_ubicacion %}
+    <div id="mapa-ficha" class="mapa pequeno" data-lat="{{ inst.lat|default:'' }}" data-lon="{{ inst.lon|default:'' }}" data-teselas="{{ teselas }}"></div>
+    <form method="post" action="{% url 'institutos:registrar_ubicacion' inst.pk %}">
+      {% csrf_token %}
+      {{ form_ubicacion.as_p }}
+      <button type="submit">Registrar ubicación</button>
+    </form>
+  {% endif %}
+  {% if ubicaciones %}
+    <h3>Historial</h3>
+    <ul>{% for u in ubicaciones %}<li>{{ u.creado_en|date:"d/m/Y H:i" }} · {{ u.lat }}, {{ u.lon }} · {{ u.get_precision_display }}{% if u.fuente %} · {{ u.fuente }}{% endif %}{% if u.registrado_por %} · {{ u.registrado_por.get_username }}{% endif %}</li>{% endfor %}</ul>
+  {% endif %}
+</section>
+
+<section id="observaciones" class="tarjeta">
+  <h2>Observaciones de datos</h2>
+  <ul>{% for o in observaciones %}<li>{% if o.resuelta %}✔ {% endif %}{{ o.texto }}</li>{% empty %}<li>Sin observaciones.</li>{% endfor %}</ul>
+</section>
+{% endblock %}
+{% block scripts %}{% if form_ubicacion %}
+<script src="{% static 'vendor/leaflet/leaflet.js' %}"></script>
+<script src="{% static 'js/ficha_ubicacion.js' %}"></script>
+{% endif %}{% endblock %}

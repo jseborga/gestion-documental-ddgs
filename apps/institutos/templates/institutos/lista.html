@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block titulo %}Institutos{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <h1>Institutos ({{ total }})</h1>
+  <a class="boton" href="{% url 'institutos:mapa' %}?{{ parametros }}">Ver en mapa</a>
+</div>
+{% include "institutos/_filtros.html" %}
+<p class="leyenda">{% for clave, texto in semaforo.items %}<span class="punto {{ clave }}"></span> {{ texto }} {% endfor %}</p>
+<table class="tabla">
+  <thead><tr><th>N°</th><th>Instituto</th><th>Región / provincia / municipio</th><th>Estudiantes</th><th>Proyectos</th><th>Inversión (Bs)</th><th>Derecho propietario</th><th>Ubicación</th></tr></thead>
+  <tbody>
+  {% for inst in pagina %}
+    <tr>
+      <td>{{ inst.numero|default:"—" }}</td>
+      <td><span class="punto {{ inst.color }}" title="{{ inst.color }}"></span> <a href="{% url 'institutos:ficha' inst.pk %}">{{ inst.nombre }}</a>{% if inst.es_subsede %} <small>(subsede)</small>{% endif %}</td>
+      <td>{{ inst.region }} / {{ inst.provincia }} / {{ inst.municipio }}</td>
+      <td>{{ inst.estudiantes|default:"—" }}</td>
+      <td>{{ inst.n_proyectos }}</td>
+      <td class="numero">{{ inst.inversion_bs|floatformat:2|intcomma|default:"—" }}</td>
+      <td>{% if inst.derecho_propietario %}{{ inst.derecho_propietario.get_estado_display }}{% else %}Sin dato{% endif %}</td>
+      <td>{% if inst.lat is not None %}{{ inst.get_precision_display }}{% else %}<strong>Pendiente</strong>{% endif %}</td>
+    </tr>
+  {% empty %}
+    <tr><td colspan="8">No hay institutos que coincidan.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% if pagina.has_other_pages %}
+<nav class="paginas">
+  {% if pagina.has_previous %}<a href="?{{ parametros }}&pagina={{ pagina.previous_page_number }}">Anterior</a>{% endif %}
+  <span>Página {{ pagina.number }} de {{ pagina.paginator.num_pages }}</span>
+  {% if pagina.has_next %}<a href="?{{ parametros }}&pagina={{ pagina.next_page_number }}">Siguiente</a>{% endif %}
+</nav>
+{% endif %}
+{% endblock %}
