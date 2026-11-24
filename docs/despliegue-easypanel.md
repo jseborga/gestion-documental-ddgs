@@ -13,7 +13,7 @@ Se despliega como un servicio **Compose** con el archivo `docker-compose.easypan
 ## Pasos
 
 1. **Proyecto.** En EasyPanel crear un proyecto, por ejemplo `gestion-documental`.
-2. **Servicio Compose.** *New Service* → **Compose** → nombre `app`. Fuente **Git**:
+2. **Servicio Compose (no "App").** *New Service* → **Compose** → nombre `app`. Si se crea como *App*, EasyPanel intenta leer el Compose como Dockerfile y falla con `unknown instruction: name:`. Fuente **Git**:
    - Repository URL: `git@github.com:jseborga/gestion-documental-ddgs.git`
    - Branch: `main`
    - Build Path: `/`
@@ -35,10 +35,12 @@ Se despliega como un servicio **Compose** con el archivo `docker-compose.easypan
    INSTITUCION_SIGLA=<sigla>
    ```
 
-   - `localhost` debe quedar en `DJANGO_ALLOWED_HOSTS`: lo usa la verificación de salud interna del contenedor.
+   - `DJANGO_ALLOWED_HOSTS` lleva solo el nombre del dominio (sin `https://` ni `/`) y debe incluir `localhost`, que usa la verificación de salud interna.
+   - `CSRF_TRUSTED_ORIGINS` lleva `https://` y **no** lleva puerto (`:8000` es interno).
+   - PostgreSQL fija la clave en el **primer** despliegue. Cambiarla después en `.env` no la cambia en la base: hay que borrar el volumen `<proyecto>_db_data` (solo si no hay datos) o cambiarla dentro de PostgreSQL.
    - Generar claves, por ejemplo: `python3 -c "import secrets; print(secrets.token_urlsafe(50))"`.
    - Si la clave de PostgreSQL tiene caracteres especiales (`@`, `:`, `/`), codificarlos en `DATABASE_URL` o usar solo letras y números.
-5. **Dominio.** En *Domains*: host = su dominio, servicio Compose = `web`, puerto destino = `8000`, HTTPS activado. No publicar `db` ni `s3`.
+5. **Dominio.** En *Domains*: host = su dominio, path `/`, **Compose service = `web`**, puerto destino = `8000`, protocolo interno **HTTP**, HTTPS activado. No publicar `db` ni `s3`. Si el servicio queda vacío, EasyPanel responde "servicio no encontrado".
 6. **Desplegar** y revisar los registros. La primera construcción tarda varios minutos. `web` aplica las migraciones al arrancar.
 7. **Comprobar:** `https://<su-dominio>/api/v1/salud/` debe responder `{"estado": "ok", ...}`.
 8. **Usuario administrador.** Por SSH en el servidor:
@@ -60,7 +62,14 @@ Se despliega como un servicio **Compose** con el archivo `docker-compose.easypan
 | Error CSRF al entrar al admin | Falta `CSRF_TRUSTED_ORIGINS=https://<su-dominio>` |
 | `web` reinicia en bucle | Clave de PostgreSQL distinta entre `POSTGRES_PASSWORD` y `DATABASE_URL`; ver registros |
 | Salud con `"almacenamiento": "error"` | `s3` aún iniciando o claves S3 distintas entre servicios |
+| "Servicio no encontrado" | El dominio no apunta al servicio Compose `web` |
+| Bad Gateway (502) | Protocolo interno en HTTPS o puerto distinto de 8000 |
+| `s3` *unhealthy* | Versión anterior al 24/11/2026 sin `-ip.bind=0.0.0.0` |
 | Redirecciones infinitas | El proxy no envía `X-Forwarded-Proto: https`; revisar que el dominio tenga HTTPS activado |
+
+## Seguridad del panel
+
+Asignar un dominio con HTTPS al propio panel de EasyPanel. Entrar por `http://IP:3000` envía sin cifrar las credenciales que controlan todo el servidor.
 
 ## Antes de usar datos reales
 
