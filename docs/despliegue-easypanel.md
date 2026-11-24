@@ -71,6 +71,10 @@ Se despliega como un servicio **Compose** con el archivo `docker-compose.easypan
    No se crean usuarios desde la terminal de la base de datos: Django guarda las claves cifradas (hash) y un `INSERT` directo deja un usuario inutilizable.
 9. **Actualizaciones.** Cada `git push` a `main` no se despliega solo: usar *Deploy* en EasyPanel (o configurar un disparador de despliegue) después de que CI esté en verde.
 
+## Institutos (etapa D2)
+
+Importación, mapa base y ubicaciones: ver `docs/modulo-institutos.md` §11. Primero siempre con `--simular`.
+
 ## Problemas frecuentes
 
 | Síntoma | Causa probable |

@@ -152,7 +152,8 @@ class TestImportacion:
         )
         assert Carrera.objects.filter(instituto=alfa).count() == 2
         assert DerechoPropietario.objects.get(instituto=alfa).apto_para_inversion
-        assert AutoridadInstituto.objects.get(instituto=alfa).telefono == "70000001"
+        # Por defecto no se guardan teléfonos (minimización).
+        assert AutoridadInstituto.objects.get(instituto=alfa).telefono == ""
         assert ObservacionDato.objects.filter(texto__contains="Folio real").count() == 2
         registro = Bitacora.objects.get(accion="institutos_importados")
         assert set(registro.despues["huellas_sha256"]) == {"datos", "ficha"}
@@ -228,3 +229,9 @@ class TestComando:
         )  # fmt: skip
         assert ObservacionDato.objects.filter(texto="Verificar dirección con la Dirección").exists()
         assert "Verificar dirección" in informe.read_text(encoding="utf-8")
+
+
+def test_telefonos_solo_si_se_habilita(planillas, unidad, settings):
+    settings.INSTITUTOS_CARGAR_TELEFONOS = True
+    services.importar(lectura=importador.leer(*planillas), unidad=unidad)
+    assert AutoridadInstituto.objects.get(instituto__numero=1).telefono == "70000001"

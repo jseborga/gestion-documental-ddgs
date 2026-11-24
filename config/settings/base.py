@@ -33,6 +33,7 @@ env = environ.Env(
     INSTITUTOS_TITULAR_PATRONES=(list, ["gobierno autonomo"]),
     IMPORTACION_MAX_MB=(int, 10),
     NOMINATIM_CONTACTO=(str, ""),
+    INSTITUTOS_CARGAR_TELEFONOS=(bool, False),
     INSTITUTOS_REGION_BUSQUEDA=(str, ""),
     INSTITUTOS_PAIS=(str, "bo"),
     MAPA_TESELAS_ATRIBUCION=(str, ""),
@@ -226,6 +227,8 @@ MAPA_TESELAS_URL = env("MAPA_TESELAS_URL")
 # de la entidad (se comparan sin tildes y en mayúsculas).
 INSTITUTOS_TITULAR_PATRONES = env("INSTITUTOS_TITULAR_PATRONES")
 IMPORTACION_MAX_MB = env("IMPORTACION_MAX_MB")
+# Minimización de datos: los teléfonos de las autoridades no se importan salvo decisión expresa.
+INSTITUTOS_CARGAR_TELEFONOS = env("INSTITUTOS_CARGAR_TELEFONOS")
 # Ubicación aproximada (comando aproximar_ubicaciones): correo de contacto exigido por
 # Nominatim, región que se agrega a la búsqueda (ej. "La Paz") y código de país.
 NOMINATIM_CONTACTO = env("NOMINATIM_CONTACTO")

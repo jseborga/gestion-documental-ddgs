@@ -137,3 +137,13 @@ class TestPermisosSobreInstituto:
             False,
             False,
         ]
+
+
+def test_expresion_de_coordenadas_sin_retroceso_costoso():
+    import time
+
+    texto = "1" + " " * 1900 + "x"
+    inicio = time.perf_counter()
+    with pytest.raises(ValidationError):
+        services.parsear_coordenadas(texto)
+    assert time.perf_counter() - inicio < 0.05

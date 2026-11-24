@@ -229,13 +229,11 @@ def leer_datos(
     if len(filas) > MAX_FILAS + 10:
         raise ArchivoNoValido(f"{ruta.name}: más de {MAX_FILAS} filas.")
 
-    encabezado_idx = next(
-        (
-            i for i, fila in enumerate(filas[:30])
-            if {"NOMBRE", "MUNICIPIO"} <= {normalizar(limpio(c)) for c in fila}
-        ),
-        None,
-    )  # fmt: skip
+    def _es_encabezado(fila) -> bool:
+        celdas = [normalizar(limpio(c)) for c in fila]
+        return any(c.startswith("NOMBRE") for c in celdas) and any("MUNICIPIO" in c for c in celdas)
+
+    encabezado_idx = next((i for i, fila in enumerate(filas[:30]) if _es_encabezado(fila)), None)
     if encabezado_idx is None:
         raise ArchivoNoValido(
             f"{ruta.name}: no se encontró la fila de encabezados (NOMBRE, MUNICIPIO)."

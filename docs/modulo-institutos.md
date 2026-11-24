@@ -115,3 +115,45 @@ Cada trámite se carga como `TipoTramite` (requisitos como lista de verificació
 **Regla de elegibilidad (art. 20.II):** para proyectos de inversión el GADLP debe tener el derecho propietario registrado en Derechos Reales y en catastro municipal. Si no, solo cabe un convenio interinstitucional con plazos de saneamiento (art. 24.III). La ficha muestra el indicador "Apto para inversión en infraestructura" calculado desde `DerechoPropietario`. Contraste con los datos actuales: los 21 proyectos de construcción y refacción registrados 2021-2025 están en institutos con derecho propietario a nombre del GADLP; los 28 institutos sin ese registro no tienen obras registradas.
 
 **Requisitos que se repiten** en casi todos los trámites y conviene guardar una sola vez en la ficha (con vigencia): designación de la máxima autoridad ejecutiva del instituto, Resolución Ministerial de apertura y funcionamiento, Folio Real a nombre del GADLP, certificado catastral y plano georreferenciado, Certificación de Factibilidad Técnica de apertura y, para institutos de convenio, el convenio vigente. Al iniciar un trámite, el sistema marca como cumplidos los requisitos que ya están vigentes en la ficha.
+
+
+## 11. Operación (implementado en D2)
+
+**Importar las planillas** (en el servidor; los archivos nunca se suben a GitHub):
+
+```bash
+# 1. Copiar los archivos al contenedor web
+docker cp DATOS.xlsx <contenedor-web>:/tmp/datos.xlsx
+docker cp FICHA.xlsx <contenedor-web>:/tmp/ficha.xlsx
+# 2. Simular y revisar el informe de observaciones
+docker exec -it <contenedor-web> python manage.py importar_institutos \
+    --datos /tmp/datos.xlsx --ficha /tmp/ficha.xlsx --unidad DDGS --simular
+# 3. Importar (se puede repetir: actualiza sin duplicar)
+docker exec -it <contenedor-web> python manage.py importar_institutos \
+    --datos /tmp/datos.xlsx --ficha /tmp/ficha.xlsx --unidad DDGS
+# 4. Borrar las copias
+docker exec -it <contenedor-web> rm /tmp/datos.xlsx /tmp/ficha.xlsx
+```
+
+Opcional: `--observaciones-extra observaciones.csv` (formato `numero;texto`) para cargar observaciones revisadas a mano, e `--informe salida.csv`.
+
+**Mapa base.** Sin configuración, el mapa muestra solo los puntos. Para usar OpenStreetMap (uso moderado, con atribución obligatoria):
+
+```dotenv
+MAPA_TESELAS_URL=https://tile.openstreetmap.org/{z}/{x}/{y}.png
+MAPA_TESELAS_ATRIBUCION=&copy; colaboradores de OpenStreetMap
+CSP_IMG_SRC_EXTRA=https://tile.openstreetmap.org
+```
+
+Para uso intensivo o sin depender de terceros: servidor de teselas propio (PMTiles u otro) y su dominio en `CSP_IMG_SRC_EXTRA`.
+
+**Ubicación aproximada por municipio** (opcional, marcada como aproximada):
+
+```bash
+docker exec -it <contenedor-web> python manage.py aproximar_ubicaciones --simular
+docker exec -it <contenedor-web> python manage.py aproximar_ubicaciones
+```
+
+Requiere `NOMINATIM_CONTACTO` (correo) e `INSTITUTOS_REGION_BUSQUEDA` (p. ej. «La Paz»). Las ubicaciones exactas se registran luego desde cada ficha: coordenadas, enlace completo de Google Maps o clic en el mapa.
+
+**Teléfonos de autoridades:** no se importan (`INSTITUTOS_CARGAR_TELEFONOS=False`). Activarlo solo con autorización expresa.

@@ -364,3 +364,9 @@ class TestHallazgosAuditoria:
             },
         )
         assert any("rol privilegiado" in m.subject for m in mail.outbox)
+
+
+def test_politica_de_referer_en_produccion():
+    from config.settings import prod
+
+    assert prod.SECURE_REFERRER_POLICY == "strict-origin-when-cross-origin"

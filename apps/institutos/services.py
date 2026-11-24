@@ -34,7 +34,9 @@ _PATRONES = [
     re.compile(r"@(-?\d{1,3}\.\d+),\s*(-?\d{1,3}\.\d+)"),  # .../@-16.49,-68.13,15z
     re.compile(r"!3d(-?\d{1,3}\.\d+)!4d(-?\d{1,3}\.\d+)"),  # ...!3d-16.49!4d-68.13
     re.compile(r"[?&](?:q|query|ll|center)=(-?\d{1,3}\.\d+)(?:,|%2C)\s*(-?\d{1,3}\.\d+)", re.I),
-    re.compile(r"^\s*(-?\d{1,3}(?:[.,]\d+)?)\s*[,;\s]\s*(-?\d{1,3}(?:[.,]\d+)?)\s*$"),  # "lat, lon"
+    re.compile(
+        r"^\s*(-?\d{1,3}(?:[.,]\d+)?)(?:\s*[,;]\s*|\s+)(-?\d{1,3}(?:[.,]\d+)?)\s*$"
+    ),  # "lat, lon"
 ]
 
 
@@ -209,10 +211,12 @@ def _aplicar(lectura, unidad: Unidad, actor, informe: InformeImportacion) -> Non
 
         if leido.rector:
             instituto.autoridades.exclude(nombre=leido.rector).update(vigente=False)
+            # Minimización (plan-general §6): el teléfono solo se guarda si se habilita.
+            telefono = leido.telefono if settings.INSTITUTOS_CARGAR_TELEFONOS else ""
             AutoridadInstituto.objects.update_or_create(
                 instituto=instituto,
                 nombre=leido.rector,
-                defaults={"telefono": leido.telefono, "vigente": True, "cargo": "Rector(a)"},
+                defaults={"telefono": telefono, "vigente": True, "cargo": "Rector(a)"},
             )
         if leido.resolucion:
             ResolucionMinisterial.objects.update_or_create(

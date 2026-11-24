@@ -4,6 +4,18 @@ Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/); versionado
 
 ## [Sin publicar]
 
+### Añadido (etapa D2: institutos)
+- Modelos de institutos con ubicación e historial, autoridades (dato personal), resoluciones, derecho propietario (indicador de aptitud para inversión, DD 100 art. 20.II), matrícula, carreras, techos y observaciones de calidad.
+- `importar_institutos`: planilla de datos y ficha técnica, con simulación, informe, huellas SHA-256 y defensas contra archivos maliciosos.
+- Lista con filtros y semáforo, mapa con Leaflet local, GeoJSON sin datos personales, ficha por secciones y registro de ubicación (coordenadas, enlace de Google Maps o clic).
+- `aproximar_ubicaciones`: ubicación aproximada por municipio (OpenStreetMap Nominatim), marcada como tal.
+- `docs/mapa-implementacion.md` y `scripts/verificar.sh`: puertas de control por paso.
+
+### Seguridad (auditoría D2)
+- Teléfonos de autoridades no se importan por defecto (minimización).
+- `Referrer-Policy` de producción: `strict-origin-when-cross-origin` (requerido por el servidor de teselas).
+- Expresión de coordenadas sin retroceso cuadrático.
+
 ### Seguridad (auditoría D1, `docs/auditoria-2026-11-24.md`)
 - SeaweedFS: componentes internos solo en `127.0.0.1`; solo la API S3 con credenciales en la red.
 - EasyPanel: `web` y `worker` fuerzan la configuración de producción.
