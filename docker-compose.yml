@@ -67,8 +67,9 @@ services:
       s3-init:
         condition: service_completed_successfully
     command: >
-      sh -c "python manage.py migrate --noinput &&
-             gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 60 --access-logfile -"
+      sh -c 'python manage.py migrate --noinput &&
+             if [ -n "$${DJANGO_SUPERUSER_USERNAME:-}" ]; then python manage.py createsuperuser --noinput || true; fi &&
+             exec gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 60 --access-logfile -'
     ports:
       - "${WEB_PORT:-8000}:8000"
     healthcheck:

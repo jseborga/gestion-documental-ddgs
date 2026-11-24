@@ -8,6 +8,7 @@ Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/); versionado
 - SeaweedFS escuchaba solo en la IP del contenedor (`-ip.bind` vacío usa `-ip`), por lo que la verificación de salud en `localhost` fallaba y `s3` quedaba *unhealthy*. Ahora escucha en `0.0.0.0` y la verificación tiene 30 s de gracia al arrancar.
 
 ### Añadido
+- Creación opcional del administrador al arrancar `web` con `DJANGO_SUPERUSER_USERNAME`, `DJANGO_SUPERUSER_EMAIL` y `DJANGO_SUPERUSER_PASSWORD` (para servidores sin acceso SSH). Si el usuario existe, continúa sin error.
 - Despliegue en EasyPanel: `docker-compose.easypanel.yml` (sin puertos publicados) y guía `docs/despliegue-easypanel.md`. CI prueba ambos archivos Compose, el de EasyPanel con la configuración de producción.
 - Catálogos (`apps/core`): unidades, cargos, personas, ocupaciones de cargo (titular, interino, suplente), instituciones externas, procesos, proyectos (con tipo, presupuesto y estados del módulo Institutos) y feriados.
 - `cargos_vigentes(persona, fecha)`: base de la bandeja por cargo; las suplencias se activan y vencen solas por fecha.

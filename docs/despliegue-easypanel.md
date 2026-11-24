@@ -43,15 +43,24 @@ Se despliega como un servicio **Compose** con el archivo `docker-compose.easypan
 5. **Dominio.** En *Domains*: host = su dominio, path `/`, **Compose service = `web`**, puerto destino = `8000`, protocolo interno **HTTP**, HTTPS activado. No publicar `db` ni `s3`. Si el servicio queda vacío, EasyPanel responde "servicio no encontrado".
 6. **Desplegar** y revisar los registros. La primera construcción tarda varios minutos. `web` aplica las migraciones al arrancar.
 7. **Comprobar:** `https://<su-dominio>/api/v1/salud/` debe responder `{"estado": "ok", ...}`.
-8. **Usuario administrador.** Por SSH en el servidor:
+8. **Usuario administrador.** Dos opciones:
+   - **Sin SSH (desde EasyPanel):** agregar temporalmente en *Environment*:
 
-   ```bash
-   docker ps --filter "name=web" --format "{{.Names}}"
-   docker exec -it <nombre-del-contenedor-web> python manage.py createsuperuser
-   docker exec -it <nombre-del-contenedor-web> python manage.py cargar_semillas   # opcional: datos ficticios
-   ```
+     ```dotenv
+     DJANGO_SUPERUSER_USERNAME=admin
+     DJANGO_SUPERUSER_EMAIL=correo@institucion.bo
+     DJANGO_SUPERUSER_PASSWORD=<clave de 12+ caracteres>
+     ```
 
-   Entrar en `https://<su-dominio>/admin/`.
+     Desplegar: `web` crea el usuario al arrancar (si ya existe, lo informa y sigue). Entrar a `/admin/` y **después borrar esas tres líneas y volver a desplegar**, para que la clave no quede guardada en el servidor.
+   - **Con SSH:**
+
+     ```bash
+     docker exec -it <proyecto>_<servicio>-web-1 python manage.py createsuperuser
+     ```
+
+   Datos ficticios de prueba (opcional): `docker exec -it <proyecto>_<servicio>-web-1 python manage.py cargar_semillas`.
+   No se crean usuarios desde la terminal de la base de datos: Django guarda las claves cifradas (hash) y un `INSERT` directo deja un usuario inutilizable.
 9. **Actualizaciones.** Cada `git push` a `main` no se despliega solo: usar *Deploy* en EasyPanel (o configurar un disparador de despliegue) después de que CI esté en verde.
 
 ## Problemas frecuentes
