@@ -184,7 +184,7 @@ Entidades `Instituto`, `Ubicacion`, `AutoridadInstituto`, `ResolucionMinisterial
 2. **Reserva urgente**: el cargo firmante puede reservar un CITE (estado `reservado`) que expira a las 24 h (configurable). El worker anula automáticamente las reservas vencidas con motivo "reserva vencida".
 3. **Anulación**: solo el cargo firmante o el administrador; motivo obligatorio (mín. 10 caracteres). El número no se reutiliza.
 4. **Asunto**: mínimo 6 palabras; rechazar asuntos genéricos (lista configurable de expresiones, ej. `^(ref\.?:?\s*)?(remito|remite|remisión de) informe\.?$`, `^favor su atención`, `^su contenido$`, `^sirvase tener presente`). Mensaje de error que explique cómo redactarlo.
-5. **Expediente**: HR obligatoria salvo "de oficio"; proceso obligatorio; proyecto obligatorio si el proceso lo requiere.
+5. **Expediente**: número de HR de Ventanilla Única opcional (la Dirección no numera HR; ver levantamiento A1), con fecha de ingreso a la Gobernación cuando exista; proceso obligatorio; proyecto obligatorio si el proceso lo requiere.
 6. **Derivación**: siempre de cargo a cargo, con plazo (por defecto `proceso.plazo_dias_defecto` en días hábiles; feriados configurables en una tabla simple). La bandeja de una persona = derivaciones `pendiente` cuyo `a_cargo` está en sus `cargos_vigentes`, incluidas suplencias.
 7. **Firma**: solo una persona con ocupación vigente en un cargo con `puede_firmar=True` igual a `cargo_firmante`. Requiere adjunto principal PDF.
 8. **Despacho**: ventanilla registra fecha de despacho; para externos, se guarda constancia (texto o adjunto).
