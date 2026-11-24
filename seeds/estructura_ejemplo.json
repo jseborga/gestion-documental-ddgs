@@ -1,0 +1,63 @@
+{
+  "_nota": "Datos SINTÉTICOS para desarrollo y pruebas. La estructura de unidades sigue el MOF 2027 (borrador); personas, instituciones y proyectos son ficticios. Los plazos de proceso son provisionales: no existe aún una tabla de plazos aprobada. No se cargan feriados: el calendario oficial lo provee Recursos Humanos.",
+  "unidades": [
+    {"sigla": "SED", "nombre": "Secretaría Ejecutiva Departamental", "nivel": "ejecutivo", "padre": null, "prefijo_cite": ""},
+    {"sigla": "SDGS", "nombre": "Secretaría Departamental de Gestión Social", "nivel": "ejecutivo", "padre": "SED", "prefijo_cite": "GADLP/SDGS"},
+    {"sigla": "DDGS", "nombre": "Dirección de Desarrollo y Gestión Social", "nivel": "ejecutivo", "padre": "SDGS", "prefijo_cite": "GADLP/SDGS/DDGS"},
+    {"sigla": "DPS", "nombre": "Dirección de Política Social", "nivel": "ejecutivo", "padre": "SDGS", "prefijo_cite": ""},
+    {"sigla": "CODEPEDIS", "nombre": "Dirección de Comité Departamental de las Personas con Discapacidad", "nivel": "ejecutivo", "padre": "SDGS", "prefijo_cite": ""},
+    {"sigla": "SEDEGES", "nombre": "Servicio Departamental de Gestión Social", "nivel": "desconcentrado", "padre": null, "prefijo_cite": ""}
+  ],
+  "cargos": [
+    {"codigo": "SDGS-SECRETARIO", "unidad": "SDGS", "nombre": "Secretario(a) Departamental", "puede_firmar": true, "es_ventanilla": false},
+    {"codigo": "DDGS-DIRECTOR", "unidad": "DDGS", "nombre": "Director(a)", "puede_firmar": true, "es_ventanilla": false},
+    {"codigo": "DDGS-SECRETARIA", "unidad": "DDGS", "nombre": "Secretaria (Administrativo I)", "puede_firmar": false, "es_ventanilla": true},
+    {"codigo": "DDGS-AUXILIAR", "unidad": "DDGS", "nombre": "Auxiliar administrativo (Administrativo I)", "puede_firmar": false, "es_ventanilla": true},
+    {"codigo": "DDGS-FISCAL-1", "unidad": "DDGS", "nombre": "Profesional I – Ingeniería civil (fiscal de obra)", "puede_firmar": false, "es_ventanilla": false},
+    {"codigo": "DDGS-FISCAL-2", "unidad": "DDGS", "nombre": "Responsable II – Arquitectura (fiscal de obra)", "puede_firmar": false, "es_ventanilla": false},
+    {"codigo": "DDGS-TECNICO-3", "unidad": "DDGS", "nombre": "Técnico III", "puede_firmar": false, "es_ventanilla": false},
+    {"codigo": "DDGS-LEGAL", "unidad": "DDGS", "nombre": "Analista técnico legal", "puede_firmar": false, "es_ventanilla": false},
+    {"codigo": "DDGS-COORD-EDU", "unidad": "DDGS", "nombre": "Coordinador(a) de educación", "puede_firmar": false, "es_ventanilla": false},
+    {"codigo": "DDGS-COORD-PROY", "unidad": "DDGS", "nombre": "Coordinador(a) de proyectos sociales y educativos", "puede_firmar": false, "es_ventanilla": false},
+    {"codigo": "DDGS-EQUIPAMIENTO", "unidad": "DDGS", "nombre": "Apoyo de equipamiento a institutos (CODAN)", "puede_firmar": false, "es_ventanilla": false}
+  ],
+  "personas": [
+    {"clave": "p01", "nombres": "Ana", "apellidos": "Ejemplo Uno", "nombre_corto": "Lic. A. E.", "email": "ana.ejemplo@ejemplo.invalid"},
+    {"clave": "p02", "nombres": "Bruno", "apellidos": "Ejemplo Dos", "nombre_corto": "Ing. B. E.", "email": "bruno.ejemplo@ejemplo.invalid"},
+    {"clave": "p03", "nombres": "Carla", "apellidos": "Ejemplo Tres", "nombre_corto": "C. E.", "email": "carla.ejemplo@ejemplo.invalid"},
+    {"clave": "p04", "nombres": "Diego", "apellidos": "Ejemplo Cuatro", "nombre_corto": "Ing. D. E.", "email": "diego.ejemplo@ejemplo.invalid"},
+    {"clave": "p05", "nombres": "Elena", "apellidos": "Ejemplo Cinco", "nombre_corto": "Arq. E. E.", "email": "elena.ejemplo@ejemplo.invalid"},
+    {"clave": "p06", "nombres": "Fabián", "apellidos": "Ejemplo Seis", "nombre_corto": "Dr. F. E.", "email": "fabian.ejemplo@ejemplo.invalid"},
+    {"clave": "p07", "nombres": "Gabriela", "apellidos": "Ejemplo Siete", "nombre_corto": "Lic. G. E.", "email": "gabriela.ejemplo@ejemplo.invalid"}
+  ],
+  "ocupaciones": [
+    {"persona": "p01", "cargo": "SDGS-SECRETARIO", "tipo": "titular", "desde": "2026-01-02", "acto_designacion": "Designación ficticia 001/2026"},
+    {"persona": "p02", "cargo": "DDGS-DIRECTOR", "tipo": "titular", "desde": "2026-01-02", "acto_designacion": "Designación ficticia 002/2026"},
+    {"persona": "p03", "cargo": "DDGS-SECRETARIA", "tipo": "titular", "desde": "2026-01-02", "acto_designacion": "Memorándum ficticio 010/2026"},
+    {"persona": "p04", "cargo": "DDGS-FISCAL-1", "tipo": "titular", "desde": "2026-01-02", "acto_designacion": "Memorándum ficticio 011/2026"},
+    {"persona": "p05", "cargo": "DDGS-FISCAL-2", "tipo": "titular", "desde": "2026-01-02", "acto_designacion": "Memorándum ficticio 012/2026"},
+    {"persona": "p06", "cargo": "DDGS-LEGAL", "tipo": "titular", "desde": "2026-01-02", "acto_designacion": "Memorándum ficticio 013/2026"},
+    {"persona": "p07", "cargo": "DDGS-COORD-EDU", "tipo": "titular", "desde": "2026-01-02", "acto_designacion": "Memorándum ficticio 014/2026"},
+    {"persona": "p04", "cargo": "DDGS-DIRECTOR", "tipo": "suplente", "desde": "2026-07-01", "hasta": "2026-07-15", "acto_designacion": "Memorándum ficticio de suplencia 020/2026"}
+  ],
+  "procesos": [
+    {"codigo": "OBRAS", "nombre": "Ejecución de obras", "requiere_proyecto": true, "plazo_dias_defecto": 5},
+    {"codigo": "PERSONAL", "nombre": "Personal y consultores", "requiere_proyecto": false, "plazo_dias_defecto": 5},
+    {"codigo": "CONTROL-LEGAL", "nombre": "Información, control y legal", "requiere_proyecto": false, "plazo_dias_defecto": 5},
+    {"codigo": "PREINV-POA", "nombre": "Preinversión, POA y presupuesto", "requiere_proyecto": false, "plazo_dias_defecto": 5},
+    {"codigo": "COMISIONES", "nombre": "Comisiones y logística", "requiere_proyecto": false, "plazo_dias_defecto": 5},
+    {"codigo": "CONTRATACIONES", "nombre": "Contrataciones y adquisiciones", "requiere_proyecto": false, "plazo_dias_defecto": 5},
+    {"codigo": "INSTITUTOS", "nombre": "Regulación de institutos técnicos", "requiere_proyecto": false, "plazo_dias_defecto": 5},
+    {"codigo": "PROGRAMAS", "nombre": "Programas (CODAN, Ayni, dotación)", "requiere_proyecto": false, "plazo_dias_defecto": 5}
+  ],
+  "instituciones": [
+    {"codigo": "ITT-EJ-A", "tipo": "instituto", "nombre": "Instituto Tecnológico Ejemplo A", "sigla": "ITEA", "municipio": "Municipio Ejemplo 1"},
+    {"codigo": "ITT-EJ-B", "tipo": "instituto", "nombre": "Instituto Técnico Ejemplo B", "sigla": "ITEB", "municipio": "Municipio Ejemplo 2"},
+    {"codigo": "GAM-EJ-1", "tipo": "gam", "nombre": "Gobierno Autónomo Municipal Ejemplo 1", "sigla": "GAM-E1", "municipio": "Municipio Ejemplo 1"},
+    {"codigo": "EMP-EJ-1", "tipo": "contratista", "nombre": "Constructora Ejemplo S.R.L.", "sigla": "", "municipio": ""}
+  ],
+  "proyectos": [
+    {"codigo": "PRY-EJ-001", "unidad": "DDGS", "nombre": "Construcción de bloque académico – Instituto Ejemplo A", "tipo": "construccion", "instituto": "ITT-EJ-A", "municipio": "Municipio Ejemplo 1", "contrato_ref": "EJ/01/2026", "gestion_inicio": 2026, "presupuesto_bs": "1500000.00", "estado": "en_ejecucion", "cargo_fiscal": "DDGS-FISCAL-1"},
+    {"codigo": "PRY-EJ-002", "unidad": "DDGS", "nombre": "Refacción de aulas – Instituto Ejemplo B", "tipo": "refaccion", "instituto": "ITT-EJ-B", "municipio": "Municipio Ejemplo 2", "contrato_ref": "EJ/02/2026", "gestion_inicio": 2026, "presupuesto_bs": "250000.00", "estado": "contratacion", "cargo_fiscal": "DDGS-FISCAL-2"}
+  ]
+}

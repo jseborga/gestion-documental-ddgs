@@ -5,6 +5,11 @@ Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/); versionado
 ## [Sin publicar]
 
 ### Añadido
+- Catálogos (`apps/core`): unidades, cargos, personas, ocupaciones de cargo (titular, interino, suplente), instituciones externas, procesos, proyectos (con tipo, presupuesto y estados del módulo Institutos) y feriados.
+- `cargos_vigentes(persona, fecha)`: base de la bandeja por cargo; las suplencias se activan y vencen solas por fecha.
+- Un solo titular por cargo en cualquier fecha (servicio con bloqueo + restricción en la base); las ocupaciones no se borran, se cierran.
+- Cálculo de días hábiles con feriados configurables (sin feriados precargados: los provee Recursos Humanos).
+- `cargar_semillas`: estructura de la Secretaría según el MOF 2027 (borrador) con personas, instituciones y proyectos ficticios; plazos de proceso provisionales.
 - Esqueleto del proyecto: Django 5.2 LTS, configuración por entorno (`base`, `dev`, `prod`, `test`) con `django-environ`, dependencias bloqueadas con `uv`.
 - `GET /api/v1/salud/`: verifica base de datos y almacenamiento; responde 503 sin exponer detalles internos.
 - Esquema OpenAPI en `/api/v1/esquema/` y documentación en `/api/v1/docs/`.
