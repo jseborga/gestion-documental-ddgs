@@ -1,5 +1,6 @@
 """Configuración común. Todo valor institucional o secreto viene de variables de entorno."""
 
+import datetime as dt
 from pathlib import Path
 
 import environ
@@ -17,6 +18,16 @@ env = environ.Env(
     SESION_INACTIVIDAD_MIN=(int, 30),
     INSTITUCION_NOMBRE=(str, "Institución"),
     INSTITUCION_SIGLA=(str, "INST"),
+    PROXIES_CONFIABLES=(int, 0),
+    SESION_MAXIMA_HORAS=(int, 10),
+    MFA_OBLIGATORIO_ROLES=(list, ["administrador", "director", "auditor"]),
+    MFA_OBLIGATORIO_TODOS=(bool, False),
+    AXES_FAILURE_LIMIT=(int, 5),
+    AXES_BLOQUEO_MINUTOS=(int, 15),
+    ALERTAS_EMAIL=(list, []),
+    RESPALDO_VIGILAR=(bool, False),
+    RESPALDO_ALERTA_HORAS=(int, 26),
+    CSP_IMG_SRC_EXTRA=(list, []),
 )
 environ.Env.read_env(BASE_DIR / ".env", overwrite=False)
 
@@ -36,22 +47,41 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "django_filters",
     "storages",
+    "django_otp",
+    "django_otp.plugins.otp_totp",
+    "django_otp.plugins.otp_static",
+    "axes",
     "apps.core",
+    "apps.auditoria",
     "apps.eventos",
+    "apps.seguridad",
     "apps.api",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "apps.seguridad.middleware.CabecerasSeguridadMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django_otp.middleware.OTPMiddleware",
+    "apps.seguridad.middleware.SesionMaximaMiddleware",
+    "apps.seguridad.middleware.SegundoFactorMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "axes.middleware.AxesMiddleware",
 ]
+
+AUTHENTICATION_BACKENDS = [
+    "axes.backends.AxesStandaloneBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
+LOGIN_URL = "seguridad:entrar"
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "seguridad:entrar"
 
 ROOT_URLCONF = "config.urls"
 WSGI_APPLICATION = "config.wsgi.application"
@@ -136,6 +166,11 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.UserRateThrottle",
+    ],
+    "DEFAULT_THROTTLE_RATES": {"anon": "30/minute", "user": "300/minute"},
 }
 
 SPECTACULAR_SETTINGS = {
@@ -149,9 +184,30 @@ SESSION_SAVE_EVERY_REQUEST = True
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = "Lax"
 
+# Seguridad (docs/seguridad.md)
+# Número de proxies inversos confiables delante de la app (EasyPanel/Traefik = 1).
+PROXIES_CONFIABLES = env("PROXIES_CONFIABLES")
+SESION_MAXIMA_HORAS = env("SESION_MAXIMA_HORAS")
+MFA_OBLIGATORIO_ROLES = env("MFA_OBLIGATORIO_ROLES")
+MFA_OBLIGATORIO_TODOS = env("MFA_OBLIGATORIO_TODOS")
+ALERTAS_EMAIL = env("ALERTAS_EMAIL")
+CSP_IMG_SRC_EXTRA = env("CSP_IMG_SRC_EXTRA")
+RESPALDO_VIGILAR = env("RESPALDO_VIGILAR")
+RESPALDO_ALERTA_HORAS = env("RESPALDO_ALERTA_HORAS")
+
+AXES_FAILURE_LIMIT = env("AXES_FAILURE_LIMIT")
+AXES_COOLOFF_TIME = dt.timedelta(minutes=env("AXES_BLOQUEO_MINUTOS"))
+# Bloqueo por combinación usuario + IP: evita que un tercero bloquee a otro usuario a propósito.
+AXES_LOCKOUT_PARAMETERS = [["username", "ip_address"]]
+AXES_RESET_ON_SUCCESS = True
+AXES_LOCKOUT_TEMPLATE = "seguridad/bloqueado.html"
+AXES_CLIENT_IP_CALLABLE = "apps.seguridad.red.ip_cliente"
+AXES_VERBOSE = False
+
 # Datos de la institución (SPEC §16: nada institucional fijo en el código)
 INSTITUCION_NOMBRE = env("INSTITUCION_NOMBRE")
 INSTITUCION_SIGLA = env("INSTITUCION_SIGLA")
+OTP_TOTP_ISSUER = INSTITUCION_SIGLA
 
 # Reglas de negocio
 CITE_RESERVA_HORAS = env("CITE_RESERVA_HORAS")

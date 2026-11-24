@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block titulo %}Iniciar sesión{% endblock %}
+{% block contenido %}
+<section class="tarjeta estrecha">
+  <h1>Iniciar sesión</h1>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <label for="id_username">Usuario</label>{{ form.username }}
+    <label for="id_password">Contraseña</label>{{ form.password }}
+    <input type="hidden" name="next" value="{{ next }}">
+    <button type="submit">Entrar</button>
+  </form>
+  <p class="nota">Tras 5 intentos fallidos el acceso se bloquea 15 minutos.</p>
+</section>
+{% endblock %}

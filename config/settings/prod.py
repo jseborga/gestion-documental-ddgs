@@ -5,6 +5,10 @@ from .base import env
 
 DEBUG = False
 
+# Detrás de EasyPanel/Traefik hay un proxy confiable salvo que se indique otra cosa.
+PROXIES_CONFIABLES = env.int("PROXIES_CONFIABLES", default=1)
+RESPALDO_VIGILAR = env.bool("RESPALDO_VIGILAR", default=True)
+
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SECURE_SSL_REDIRECT = env.bool("SECURE_SSL_REDIRECT", default=True)
 SECURE_HSTS_SECONDS = env.int("SECURE_HSTS_SECONDS", default=31536000)

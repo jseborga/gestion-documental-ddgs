@@ -8,6 +8,11 @@ Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/); versionado
 - SeaweedFS escuchaba solo en la IP del contenedor (`-ip.bind` vacío usa `-ip`), por lo que la verificación de salud en `localhost` fallaba y `s3` quedaba *unhealthy*. Ahora escucha en `0.0.0.0` y la verificación tiene 30 s de gracia al arrancar.
 
 ### Añadido
+- **Seguridad (`apps/seguridad`)**: roles como grupos; autorización central `puede(usuario, acción, objeto)` con matriz probada rol × acción × clasificación; segundo factor TOTP obligatorio para administrador, director, auditor y superusuario, con códigos de recuperación de un solo uso; bloqueo tras 5 intentos (15 min) por usuario + IP; IP real detrás del proxy; sesión con inactividad de 30 min y máximo absoluto de 10 h; pantalla «Mis sesiones»; cabeceras CSP y Permissions-Policy; alertas por correo (superusuario, 10 fallos en 10 min, cuentas desactivadas, falta de respaldo); desactivación diaria de cuentas sin cargo; el rol administrador no puede otorgarse superusuario ni staff.
+- **Bitácora (`apps/auditoria`)**: solo agregado; PostgreSQL rechaza UPDATE y DELETE mediante trigger; oculta campos sensibles; visible en el admin solo para administrador y auditor.
+- **Eventos (`apps/eventos`)**: outbox transaccional, procesamiento con `SKIP LOCKED`, reintentos (máx. 5) y tareas periódicas del worker.
+- Catálogos: cambios en el admin y en ocupaciones de cargo registrados en la bitácora y en eventos; permisos del admin por `puede()`.
+- Página de inicio con roles, cargos vigentes y estado del segundo factor; el admin usa el mismo inicio de sesión.
 - `docs/plan-general.md`: módulos M1-M10, firma en dos niveles, alcance de activos frente al registro oficial, orden del demo (D1-D6) y reglas para usar datos reales.
 - Creación opcional del administrador al arrancar `web` con `DJANGO_SUPERUSER_USERNAME`, `DJANGO_SUPERUSER_EMAIL` y `DJANGO_SUPERUSER_PASSWORD` (para servidores sin acceso SSH). Si el usuario existe, continúa sin error.
 - Despliegue en EasyPanel: `docker-compose.easypanel.yml` (sin puertos publicados) y guía `docs/despliegue-easypanel.md`. CI prueba ambos archivos Compose, el de EasyPanel con la configuración de producción.

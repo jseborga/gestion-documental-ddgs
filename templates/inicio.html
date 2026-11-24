@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block titulo %}Inicio{% endblock %}
+{% block contenido %}
+<h1>{{ institucion }}</h1>
+<p>Bienvenido(a), <strong>{{ persona|default:user.get_username }}</strong>.</p>
+<section class="tarjeta">
+  <h2>Su acceso</h2>
+  <p><strong>Roles:</strong> {{ roles|join:", "|default:"ninguno asignado" }}</p>
+  <p><strong>Cargos vigentes:</strong></p>
+  <ul>{% for cargo in cargos %}<li>{{ cargo }}</li>{% empty %}<li>Ninguno</li>{% endfor %}</ul>
+  <p><strong>Segundo factor:</strong> {% if tiene_2fa %}activado{% else %}no activado — <a href="{% url 'seguridad:configurar_2fa' %}">activarlo</a>{% endif %}</p>
+</section>
+<p class="nota">La bandeja de correspondencia y el mapa de institutos se habilitan en las próximas etapas.</p>
+{% endblock %}

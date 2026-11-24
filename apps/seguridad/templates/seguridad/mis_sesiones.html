@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block titulo %}Mis sesiones{% endblock %}
+{% block contenido %}
+<h1>Mis sesiones abiertas</h1>
+<table class="tabla">
+  <thead><tr><th>Inicio</th><th>IP</th><th>Navegador</th><th></th></tr></thead>
+  <tbody>
+  {% for s in sesiones %}
+    <tr>
+      <td>{{ s.inicio|date:"d/m/Y H:i" }}</td>
+      <td>{{ s.ip|default:"—" }}</td>
+      <td>{{ s.agente|truncatechars:60 }}</td>
+      <td>{% if s.clave_sesion == actual %}Esta sesión{% else %}
+        <form method="post">{% csrf_token %}<input type="hidden" name="sesion" value="{{ s.pk }}"><button type="submit">Cerrar</button></form>
+      {% endif %}</td>
+    </tr>
+  {% empty %}<tr><td colspan="4">No hay sesiones registradas.</td></tr>{% endfor %}
+  </tbody>
+</table>
+{% if user.is_verified %}
+<form method="post" action="{% url 'seguridad:regenerar_codigos' %}">{% csrf_token %}<button type="submit">Generar nuevos códigos de recuperación</button></form>
+{% endif %}
+<p><a href="{% url 'seguridad:configurar_2fa' %}">Cambiar el dispositivo de segundo factor</a></p>
+{% endblock %}

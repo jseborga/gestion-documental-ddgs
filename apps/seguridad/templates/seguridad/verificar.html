@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block titulo %}Segundo factor{% endblock %}
+{% block contenido %}
+<section class="tarjeta estrecha">
+  <h1>Verificación en dos pasos</h1>
+  <p>Escriba el código de 6 dígitos de su aplicación de autenticación, o uno de sus códigos de recuperación.</p>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.codigo.errors }}
+    <label for="id_codigo">Código</label>{{ form.codigo }}
+    <input type="hidden" name="next" value="{{ next }}">
+    <button type="submit">Verificar</button>
+  </form>
+</section>
+{% endblock %}

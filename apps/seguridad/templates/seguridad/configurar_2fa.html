@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block titulo %}Activar segundo factor{% endblock %}
+{% block contenido %}
+<section class="tarjeta estrecha">
+  <h1>Activar la verificación en dos pasos</h1>
+  {% if reemplaza %}<p class="mensaje warning">Esto reemplazará el dispositivo que tiene configurado.</p>{% endif %}
+  <ol>
+    <li>Instale en su celular una aplicación de autenticación (Google Authenticator, Microsoft Authenticator, FreeOTP u otra).</li>
+    <li>Escanee este código QR:</li>
+  </ol>
+  <div class="qr">{{ qr|safe }}</div>
+  <p class="nota">Si no puede escanear, ingrese esta clave manualmente: <code>{{ secreto }}</code></p>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.codigo.errors }}
+    <label for="id_codigo">3. Escriba el código de 6 dígitos que muestra la aplicación</label>{{ form.codigo }}
+    <input type="hidden" name="next" value="{{ next }}">
+    <button type="submit">Activar</button>
+  </form>
+</section>
+{% endblock %}

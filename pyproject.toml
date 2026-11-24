@@ -15,6 +15,9 @@ dependencies = [
     "boto3>=1.35",
     "whitenoise>=6.8",
     "gunicorn>=23.0",
+    "django-otp>=1.5",
+    "django-axes>=8.0",
+    "qrcode>=8.0",
 ]
 
 [dependency-groups]
@@ -58,5 +61,20 @@ root_packages = ["apps"]
 [[tool.importlinter.contracts]]
 name = "Las apps de dominio no dependen de la capa API"
 type = "forbidden"
-source_modules = ["apps.core", "apps.eventos"]
+source_modules = ["apps.core", "apps.eventos", "apps.auditoria", "apps.seguridad"]
 forbidden_modules = ["apps.api"]
+
+[[tool.importlinter.contracts]]
+name = "La lógica de catálogos, bitácora y eventos no depende de seguridad"
+type = "forbidden"
+source_modules = [
+    "apps.core.models",
+    "apps.core.services",
+    "apps.core.selectors",
+    "apps.auditoria.models",
+    "apps.auditoria.services",
+    "apps.auditoria.selectors",
+    "apps.eventos.models",
+    "apps.eventos.services",
+]
+forbidden_modules = ["apps.seguridad"]

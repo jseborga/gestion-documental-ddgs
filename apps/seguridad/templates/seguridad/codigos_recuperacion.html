@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block titulo %}Códigos de recuperación{% endblock %}
+{% block contenido %}
+<section class="tarjeta estrecha">
+  <h1>Guarde sus códigos de recuperación</h1>
+  <p class="mensaje warning">Se muestran <strong>una sola vez</strong>. Cada código sirve una vez si pierde el celular. Guárdelos en un lugar seguro, fuera del celular.</p>
+  <ul class="codigos">{% for codigo in codigos %}<li><code>{{ codigo }}</code></li>{% endfor %}</ul>
+  <a class="boton" href="{{ next|default:'/' }}">Ya los guardé, continuar</a>
+</section>
+{% endblock %}
