@@ -20,6 +20,10 @@ docker compose exec web python manage.py cargar_semillas   # disponible desde el
 
 Comprobación: `curl http://localhost:8000/api/v1/salud/` debe responder `{"estado": "ok", ...}`.
 
+## Despliegue en EasyPanel
+
+Ver [`docs/despliegue-easypanel.md`](docs/despliegue-easypanel.md) (servicio Compose con `docker-compose.easypanel.yml`).
+
 ## Desarrollo sin Docker
 
 Requiere Python 3.12, [uv](https://docs.astral.sh/uv/) y un PostgreSQL accesible.

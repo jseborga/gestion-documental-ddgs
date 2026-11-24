@@ -5,6 +5,7 @@ Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/); versionado
 ## [Sin publicar]
 
 ### Añadido
+- Despliegue en EasyPanel: `docker-compose.easypanel.yml` (sin puertos publicados) y guía `docs/despliegue-easypanel.md`. CI prueba ambos archivos Compose, el de EasyPanel con la configuración de producción.
 - Catálogos (`apps/core`): unidades, cargos, personas, ocupaciones de cargo (titular, interino, suplente), instituciones externas, procesos, proyectos (con tipo, presupuesto y estados del módulo Institutos) y feriados.
 - `cargos_vigentes(persona, fecha)`: base de la bandeja por cargo; las suplencias se activan y vencen solas por fecha.
 - Un solo titular por cargo en cualquier fecha (servicio con bloqueo + restricción en la base); las ocupaciones no se borran, se cierran.
