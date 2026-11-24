@@ -99,6 +99,20 @@ jobs:
           echo "La aplicación no respondió a tiempo"; exit 1
       - name: El worker sigue vivo
         run: test "$(docker compose ps worker --status running -q | wc -l)" -eq 1
+      - name: Respaldo y restauración en una base nueva
+        if: matrix.archivo == 'docker-compose.easypanel.yml'
+        run: |
+          docker compose up -d --build backup
+          docker compose exec -T backup backup.sh
+          docker compose exec -T db psql -U gestion -d gestion_documental -Atc \
+            "SELECT accion FROM auditoria_bitacora WHERE objeto_tipo='respaldo' ORDER BY id DESC LIMIT 1" | grep -qx respaldo_ok
+          docker compose exec -T db psql -U gestion -d gestion_documental -c "CREATE DATABASE restaurada"
+          docker compose exec -T -e RESTORE_DATABASE_URL=postgres://gestion:cambiar-esta-clave@db:5432/restaurada \
+            backup restore.sh local
+          for base in gestion_documental restaurada; do
+            docker compose exec -T db psql -U gestion -d "$base" -Atc "SELECT count(*) FROM auth_group" | tee -a conteos.txt
+          done
+          test "$(sort -u conteos.txt | wc -l)" -eq 1
       - name: Registros si algo falla
         if: failure()
         run: docker compose logs --no-color --tail 200

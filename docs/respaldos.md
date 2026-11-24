@@ -70,3 +70,18 @@ RESTIC_REPOSITORY_nube1=s3:https://s3.amazonaws.com/mi-bucket-respaldo   # AWS S
 RESTIC_PASSWORD_nube1=...
 ```
 Las credenciales de cada proveedor (AWS, Google, Azure, B2, rclone) van en variables o archivos montados como secretos, nunca en el repositorio. La sintaxis exacta de cada destino se verifica contra la documentación de restic al implementar.
+
+## 9. Estado de implementación (24/11/2026, etapa D1)
+
+- Servicio `backup` activo en `docker-compose.easypanel.yml` (en el Compose de desarrollo, perfil `backup`). Programa `backup.sh` con el cron del contenedor (`BACKUP_HORARIO`, por defecto 02:00, zona `TZ`).
+- Respalda la base (`pg_dump` formato custom) y el bucket S3 (`rclone`), cifrados por restic, en cada destino de `BACKUP_DESTINOS`; aplica la retención y verifica el 5 % de los datos los domingos.
+- Registra `respaldo_ok` o `respaldo_fallido` en la bitácora de seguridad. El worker alerta por correo si no hay un respaldo exitoso en `RESPALDO_ALERTA_HORAS` (26 h).
+- `restore.sh DESTINO [SNAPSHOT]` restaura en `RESTORE_DATABASE_URL`; se niega a sobrescribir la base en uso salvo `RESTAURAR_SOBRE_PRODUCCION=si`. La CI respalda y restaura en una base nueva en cada cambio.
+- **Limitación actual:** con solo el destino `local`, la copia queda en el mismo servidor. Protege contra errores y borrados, no contra la pérdida del servidor. Antes de producción se agrega al menos un destino fuera del servidor (SFTP a otro equipo en Bolivia o nube autorizada, ver §4).
+
+Manual:
+
+```bash
+docker exec -it <proyecto>_<servicio>-backup-1 backup.sh
+docker exec -it -e RESTORE_DATABASE_URL=postgres://gestion:CLAVE@db:5432/restaurada <proyecto>_<servicio>-backup-1 restore.sh local
+```

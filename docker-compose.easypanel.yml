@@ -87,6 +87,23 @@ services:
         condition: service_healthy
     command: python manage.py procesar_eventos --loop
 
+  backup:
+    # Respaldo diario cifrado (restic) de base y archivos. Ver docs/respaldos.md.
+    # Manual: docker compose exec backup backup.sh
+    build:
+      context: .
+      dockerfile: docker/backup/Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      TZ: ${TZ:-America/La_Paz}
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - respaldos_local:/respaldos
+
 volumes:
   db_data:
   s3_data:
+  respaldos_local:

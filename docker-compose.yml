@@ -94,19 +94,22 @@ services:
       - "8025:8025"
 
   backup:
-    # Respaldo cifrado multi-destino (restic + rclone). Ver docs/respaldos.md.
-    # Uso: docker compose --profile backup run --rm backup
-    build: ./docker/backup
+    # Respaldo diario cifrado (restic) de base y archivos. Ver docs/respaldos.md.
+    # Manual: docker compose exec backup backup.sh
+    build:
+      context: .
+      dockerfile: docker/backup/Dockerfile
     profiles: ["backup"]
+    restart: unless-stopped
     env_file: .env
+    environment:
+      TZ: ${TZ:-America/La_Paz}
     depends_on:
       db:
         condition: service_healthy
     volumes:
-      - ./scripts:/scripts:ro
       - respaldos_local:/respaldos
-      - ${RCLONE_CONFIG_DIR:-./secrets/rclone}:/config/rclone:ro
-    command: /scripts/backup.sh
+      - ${RCLONE_CONFIG_DIR:-./secrets/rclone}:/root/.config/rclone:ro
 
   antivirus:
     image: clamav/clamav:stable
