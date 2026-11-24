@@ -8,7 +8,7 @@ Lee `SPEC.md`, `docs/seguridad.md`, `docs/politicas-ingenieria.md` y `docs/respa
 - Lógica de negocio solo en `apps/*/services.py`. Views, serializers y admin llaman a servicios; nunca cambian estados directamente.
 - Cada transición: `transaction.atomic()` + registro en `Bitacora` + inserción en `EventoOutbox`, todo en la misma transacción.
 
-Lee también `docs/levantamiento-2026-11.md`: sus ajustes A1-A18 prevalecen sobre SPEC.md donde difieran.
+Lee también `docs/levantamiento-2026-11.md` (ajustes A1-A18) y **`docs/plan-general.md`**, que fija los módulos y el orden de desarrollo del demo (etapas D1-D6). Ambos prevalecen sobre SPEC.md donde difieran; el plan general prevalece sobre el orden de pasos de abajo.
 
 ## Orden de trabajo (un commit por paso, pruebas incluidas)
 1. Esqueleto: `pyproject.toml` con `uv` y `uv.lock`, `config/settings/{base,dev,prod}.py` con `django-environ`, `Dockerfile` multi-etapa (usuario no root), `docker-compose.yml` funcionando, `/api/v1/salud/`.
@@ -38,6 +38,8 @@ docker compose exec web python manage.py importar_registro_excel --archivo /dato
 - Mantener `docs/` (manuales), `CHANGELOG.md` y etiquetas de versión al cerrar cada paso.
 
 ## Prohibido
+- Subir a GitHub los Excel de institutos o del registro aunque el demo use datos reales: se cargan solo en el servidor.
+- Presentar la imagen de una firma como firma digital (plan-general §3).
 - Subir datos reales (Excel del registro, nombres de funcionarios, `alias.csv`, `.env`).
 - Calcular el CITE con `MAX()+1` o fuera de una transacción con bloqueo.
 - Usar MinIO Community (ver ADR-04); usar SeaweedFS (o Garage si SeaweedFS falla).
