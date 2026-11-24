@@ -39,12 +39,13 @@ Reemplazar el Excel en la DDGS con un sistema web que:
 - Bandeja por cargo, búsqueda, tablero básico.
 - Bitácora inmutable y outbox de eventos.
 - Importación del Excel histórico 2026 (comando de gestión).
+- Módulo **Institutos**: catálogo de los 44 institutos, mapa con filtros, ficha integral (proyectos, inversiones, estado legal, matrícula, correspondencia) y captura de ubicación. Detalle en `docs/modulo-institutos.md`.
 - Despliegue con Docker Compose.
 
 ### 2.2 Fuera del alcance (fases posteriores)
 
 - Firma digital criptográfica del PDF (fase 2; el MVP registra "firmado por" + PDF subido).
-- Módulo de obras (planillas, garantías con alertas), POA, activos (fase 3+).
+- Módulo de obras (planillas, garantías con alertas), POA, activos (fase 3+). La ficha del instituto muestra proyectos y dotación como registros simples hasta entonces.
 - Búsqueda vectorial e IA (fase 4; dejar pgvector disponible).
 - Interoperabilidad entre instituciones (fase 5; solo dejar el endpoint detrás de bandera).
 - Login con Ciudadanía Digital / OIDC (dejar preparado, no implementar).
@@ -171,6 +172,10 @@ Convenciones: PK `id` bigint; `creado_en`/`actualizado_en` en todas las tablas d
 - Tipos mínimos: `expediente.creado`, `expediente.derivado`, `expediente.cerrado`, `documento.enviado_revision`, `documento.observado`, `documento.firmado`, `documento.despachado`, `documento.anulado`, `derivacion.vencida`, `adjunto.subido`.
 - Consumidores del MVP: (a) marcar derivaciones vencidas y notificar por correo; (b) anular reservas vencidas; (c) placeholder de extracción de texto (no hace nada en MVP).
 
+### 5.6 institutos
+
+Entidades `Instituto`, `Ubicacion`, `AutoridadInstituto`, `ResolucionMinisterial`, `DerechoPropietario`, `Matricula`, `Carrera`, `TechoPresupuestario`; `Proyecto` (core) gana `instituto`, `tipo`, `presupuesto_bs`, `ejecutado_bs`, `estado` y `codigo_sisin`. Campos, reglas y mapa en `docs/modulo-institutos.md`. Lat/lon decimales; PostGIS solo con ADR.
+
 ## 6. Reglas de negocio
 
 1. **CITE**: formato `{prefijo_cite}/{TIPO}-{numero}/{anio}`, ej. `GADLP/SDGS/DDGS/NIN-125/2026`. Se asigna **al firmar**, dentro de `transaction.atomic()` con `select_for_update()` sobre `SecuenciaCite` (crear la fila si no existe, también bloqueada). Prohibido calcular el siguiente número con `MAX()+1`.
@@ -230,6 +235,7 @@ Las transiciones viven en `services.py` (no en views ni serializers) y son las m
 6. **Búsqueda** con filtros (tipo, proceso, proyecto, estado, fechas).
 7. **Tablero**: documentos por mes y proceso, pendientes por cargo, vencidas, tiempo medio de atención por derivación.
 8. **Admin Django** para catálogos y ocupaciones.
+9. **Mapa de institutos** (Leaflet servido localmente; teselas propias o de OpenStreetMap con atribución) y **ficha integral** por pestañas, según `docs/modulo-institutos.md` §4-5.
 
 Requisitos: español, accesible con teclado, usable en pantallas de 1366 px y en móvil para la bandeja. Sin dependencias de CDN en producción (servir estáticos localmente).
 
@@ -300,6 +306,7 @@ Ver **`docs/politicas-ingenieria.md`**: stack fijo y política de versiones, lí
 5. El importador procesa un Excel sintético con la misma estructura que el real y emite su informe.
 6. Todas las pruebas del punto 12 pasan en CI.
 7. `scripts/backup.sh` + `scripts/restore.sh` reconstruyen la base y los archivos en un entorno limpio.
+8. Se cumplen los criterios de `docs/modulo-institutos.md` §9 con un Excel sintético de institutos.
 
 ## 15. Hoja de ruta posterior
 

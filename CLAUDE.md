@@ -19,6 +19,7 @@ Lee `SPEC.md`, `docs/seguridad.md`, `docs/politicas-ingenieria.md` y `docs/respa
 7. UI HTMX (sección 9) y `apps/tablero`.
 8. `apps/importacion`: comando del Excel histórico con Excel sintético de prueba.
 9. `docker/backup/Dockerfile`, `scripts/backup.sh` y `scripts/restore.sh` multi-destino (restic + rclone) según docs/respaldos.md; CI en GitHub Actions con los controles de docs/seguridad.md §3 y docs/politicas-ingenieria.md §5.
+9b. `apps/institutos`: modelos, comando `importar_institutos` (Excel sintético en `seeds/`), endpoint GeoJSON, mapa Leaflet y ficha por pestañas, según `docs/modulo-institutos.md`. El GeoJSON nunca expone teléfonos ni nombres de autoridades.
 10. `docs/` completos (MkDocs), `docs/asvs-matriz.md`, `docs/incidentes.md`, ADR iniciales en `docs/adr/` (uno por cada ADR de SPEC.md §3).
 
 ## Comandos esperados
