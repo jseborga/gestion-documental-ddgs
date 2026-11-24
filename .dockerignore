@@ -1,0 +1,15 @@
+.git
+.github
+.venv
+.env
+*.xlsx
+*.csv
+datos/
+respaldos/
+secrets/
+media/
+staticfiles/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/

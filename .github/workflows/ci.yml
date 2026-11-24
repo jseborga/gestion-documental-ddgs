@@ -1,0 +1,92 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  calidad:
+    name: Lint, seguridad y pruebas
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg17
+        env:
+          POSTGRES_DB: gestion_documental
+          POSTGRES_USER: gestion
+          POSTGRES_PASSWORD: gestion
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U gestion -d gestion_documental"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+    env:
+      DATABASE_URL: postgres://gestion:gestion@localhost:5432/gestion_documental
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+      - name: Dependencias (desde uv.lock)
+        run: uv sync --frozen
+      - name: Formato y lint
+        run: |
+          uv run ruff format --check .
+          uv run ruff check .
+      - name: Límites entre módulos
+        run: uv run lint-imports
+      - name: Análisis estático de seguridad
+        run: uv run bandit -q -c pyproject.toml -r apps config
+      - name: Vulnerabilidades en dependencias
+        run: uv run pip-audit --strict --skip-editable
+      - name: Migraciones sin crear
+        run: uv run python manage.py makemigrations --check --dry-run --settings=config.settings.test
+      - name: Configuración de producción
+        env:
+          DJANGO_SECRET_KEY: ${{ github.run_id }}-clave-ficticia-solo-para-ci-con-longitud-suficiente
+          DJANGO_ALLOWED_HOSTS: ejemplo.bo
+        run: uv run python manage.py check --deploy --fail-level WARNING --settings=config.settings.prod
+      - name: Pruebas
+        run: uv run pytest --cov=apps --cov-report=term-missing
+
+  secretos:
+    name: Búsqueda de secretos
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  compose:
+    name: Docker Compose de punta a punta
+    runs-on: ubuntu-latest
+    needs: calidad
+    steps:
+      - uses: actions/checkout@v4
+      - name: Levantar servicios con el .env de ejemplo
+        run: |
+          cp .env.example .env
+          docker compose up -d --build db s3 s3-init web worker
+      - name: Salud (espera hasta 5 minutos)
+        run: |
+          for i in $(seq 1 60); do
+            if curl --fail --silent http://localhost:8000/api/v1/salud/ -o salud.json; then
+              cat salud.json; grep -q '"estado": "ok"' salud.json && exit 0
+            fi
+            sleep 5
+          done
+          echo "La aplicación no respondió a tiempo"; exit 1
+      - name: El worker sigue vivo
+        run: test "$(docker compose ps worker --status running -q | wc -l)" -eq 1
+      - name: Registros si algo falla
+        if: failure()
+        run: docker compose logs --no-color --tail 200
+      - name: Bajar servicios
+        if: always()
+        run: docker compose down -v
