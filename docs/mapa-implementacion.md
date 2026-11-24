@@ -21,7 +21,7 @@ Un paso queda terminado solo si cumple todo esto, en este orden:
 | P11 | Documentación y `CHANGELOG.md` actualizados | Revisión del diff |
 | P12 | CI de GitHub en verde (incluye Docker Compose de punta a punta y respaldo/restauración) | Pestaña Actions |
 
-`scripts/verificar.sh` ejecuta P2 a P8 de una vez; es lo mismo que corre la CI, para detectar fallas antes de subir.
+`scripts/verificar.sh` ejecuta P2 a P8 de una vez; es lo mismo que corre la CI, para detectar fallas antes de subir. **La puerta solo se considera superada si el script termina con código 0** (mensaje «Puerta superada»); nunca se juzga por una salida filtrada. Lección del 24/11/2026: un commit se subió con dos líneas largas porque la salida se filtró y el código de salida no se comprobó; se corrigió en el commit siguiente.
 
 ## 2. Revisión de amenazas por paso (STRIDE abreviado)
 
