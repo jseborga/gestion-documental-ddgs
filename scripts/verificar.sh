@@ -33,6 +33,16 @@ DJANGO_SECRET_KEY="$(python3 -c 'import secrets; print(secrets.token_urlsafe(50)
   DJANGO_ALLOWED_HOSTS=ejemplo.bo \
   uv run python manage.py check --deploy --fail-level WARNING --settings=config.settings.prod
 
+paso "P7 Estáticos de producción (igual que el Dockerfile)"
+# El almacenamiento con manifiesto sigue referencias de CSS/JS (p. ej. sourceMappingURL):
+# si falta un archivo, la imagen Docker no se construye.
+rm -rf staticfiles
+env -i PATH="$PATH" HOME="$HOME" DJANGO_SETTINGS_MODULE=config.settings.prod \
+  DJANGO_SECRET_KEY=solo-construccion DATABASE_URL=sqlite:////tmp/verificar-estaticos.db \
+  uv run python manage.py collectstatic --noinput -v0
+rm -rf staticfiles
+echo "ok"
+
 paso "P2 Pruebas y cobertura"
 uv run pytest -q -p no:logging --cov=apps --cov-report=term:skip-covered --cov-fail-under=85
 

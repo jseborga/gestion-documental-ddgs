@@ -4,6 +4,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/); versionado
 
 ## [Sin publicar]
 
+### Corregido
+- La imagen Docker no se construía: `leaflet.js` referencia `leaflet.js.map` y el almacenamiento de estáticos de producción lo exige. Se incluye el archivo del mismo paquete npm (sumas SHA-256 actualizadas) y la generación de estáticos de producción pasa a la puerta de control y a la CI.
+
 ### Añadido (etapa D2: institutos)
 - Modelos de institutos con ubicación e historial, autoridades (dato personal), resoluciones, derecho propietario (indicador de aptitud para inversión, DD 100 art. 20.II), matrícula, carreras, techos y observaciones de calidad.
 - `importar_institutos`: planilla de datos y ficha técnica, con simulación, informe, huellas SHA-256 y defensas contra archivos maliciosos.

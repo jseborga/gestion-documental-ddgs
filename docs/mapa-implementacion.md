@@ -14,14 +14,14 @@ Un paso queda terminado solo si cumple todo esto, en este orden:
 | P4 | Dependencias sin vulnerabilidades conocidas | pip-audit (en `verificar.sh`) |
 | P5 | Límites entre módulos respetados | import-linter (en `verificar.sh`) |
 | P6 | Migraciones completas y reversibles | `makemigrations --check` + prueba de ida y vuelta |
-| P7 | Configuración de producción sin advertencias | `check --deploy` (en `verificar.sh`) |
+| P7 | Configuración de producción sin advertencias y estáticos de producción generables (igual que el Dockerfile) | `check --deploy` y `collectstatic` (en `verificar.sh`) |
 | P8 | Sin datos reales ni secretos en el repositorio | `verificar.sh` (archivos de datos) + gitleaks en CI |
 | P9 | Revisión de amenazas del paso (tabla §2) con cada riesgo mitigado o aceptado por escrito | Sección del paso en este documento |
 | P10 | Permisos: toda vista nueva pasa por `puede()` y tiene prueba de acceso denegado | Pruebas del paso |
 | P11 | Documentación y `CHANGELOG.md` actualizados | Revisión del diff |
 | P12 | CI de GitHub en verde (incluye Docker Compose de punta a punta y respaldo/restauración) | Pestaña Actions |
 
-`scripts/verificar.sh` ejecuta P2 a P8 de una vez; es lo mismo que corre la CI, para detectar fallas antes de subir. **La puerta solo se considera superada si el script termina con código 0** (mensaje «Puerta superada»); nunca se juzga por una salida filtrada. Lección del 24/11/2026: un commit se subió con dos líneas largas porque la salida se filtró y el código de salida no se comprobó; se corrigió en el commit siguiente.
+`scripts/verificar.sh` ejecuta P2 a P8 de una vez; es lo mismo que corre la CI, para detectar fallas antes de subir. **La puerta solo se considera superada si el script termina con código 0** (mensaje «Puerta superada»); nunca se juzga por una salida filtrada. Lección del 26/11/2026: la imagen Docker no se construyó porque `leaflet.js` referencia `leaflet.js.map`, que no se había copiado; la puerta no generaba los estáticos de producción. Se agregó ese paso a la puerta y a la CI. Lección del 24/11/2026: un commit se subió con dos líneas largas porque la salida se filtró y el código de salida no se comprobó; se corrigió en el commit siguiente.
 
 ## 2. Revisión de amenazas por paso (STRIDE abreviado)
 

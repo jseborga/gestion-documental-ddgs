@@ -54,6 +54,11 @@ jobs:
           DJANGO_SECRET_KEY: ${{ github.run_id }}-clave-ficticia-solo-para-ci-con-longitud-suficiente
           DJANGO_ALLOWED_HOSTS: ejemplo.bo
         run: uv run python manage.py check --deploy --fail-level WARNING --settings=config.settings.prod
+      - name: Estáticos de producción (igual que el Dockerfile)
+        run: |
+          env -i PATH="$PATH" HOME="$HOME" DJANGO_SETTINGS_MODULE=config.settings.prod \
+            DJANGO_SECRET_KEY=solo-construccion DATABASE_URL=sqlite:////tmp/estaticos.db \
+            uv run python manage.py collectstatic --noinput -v0
       - name: Pruebas
         run: uv run pytest --cov=apps --cov-report=term-missing
 
