@@ -2,8 +2,10 @@
 
 import datetime as dt
 from pathlib import Path
+from urllib.parse import urlparse
 
 import environ
+from django.core.exceptions import ImproperlyConfigured
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -11,7 +13,7 @@ env = environ.Env(
     DJANGO_DEBUG=(bool, False),
     DJANGO_ALLOWED_HOSTS=(list, []),
     CSRF_TRUSTED_ORIGINS=(list, []),
-    S3_ENDPOINT_URL=(str, ""),
+    S3_ENDPOINT=(str, ""),
     CITE_RESERVA_HORAS=(int, 0),
     ADJUNTO_MAX_MB=(int, 25),
     INTEROP_HABILITADO=(bool, False),
@@ -62,6 +64,7 @@ INSTALLED_APPS = [
     "django_otp.plugins.otp_static",
     "axes",
     "apps.core",
+    "apps.archivos",
     "apps.auditoria",
     "apps.eventos",
     "apps.seguridad",
@@ -137,27 +140,36 @@ STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
-# Archivos: API S3 (SeaweedFS por defecto, ADR-04). Sin S3 configurado se usa disco local.
-S3_ENDPOINT_URL = env("S3_ENDPOINT_URL")
-if S3_ENDPOINT_URL:
+# Archivos: S3 interno (SeaweedFS, ADR-04) por la red de Docker, HTTP y estilo de ruta.
+# Nunca se entrega su URL al navegador (apps/archivos/almacen.py). Sin S3: disco local.
+# S3_ENDPOINT_URL se acepta por compatibilidad con instalaciones anteriores.
+S3_ENDPOINT = env("S3_ENDPOINT") or env("S3_ENDPOINT_URL", default="")
+if "_" in (urlparse(S3_ENDPOINT).hostname or ""):
+    # boto3 rechaza hosts con guion bajo (formato <proyecto>_<servicio> de EasyPanel).
+    raise ImproperlyConfigured(
+        f"S3_ENDPOINT={S3_ENDPOINT!r}: boto3 no acepta nombres de host con guion bajo. "
+        "Use S3_ENDPOINT=http://s3-proxy:8333 y S3_SERVICIO_INTERNO=<proyecto>_<servicio>:8333 "
+        "(docs/despliegue-easypanel.md)."
+    )
+if S3_ENDPOINT:
     _almacen_por_defecto = {
-        "BACKEND": "storages.backends.s3.S3Storage",
+        "BACKEND": "apps.archivos.almacen.AlmacenPrivadoS3",
         "OPTIONS": {
-            "endpoint_url": S3_ENDPOINT_URL,
+            "endpoint_url": S3_ENDPOINT,
             "access_key": env("S3_ACCESS_KEY"),
             "secret_key": env("S3_SECRET_KEY"),
             "bucket_name": env("S3_BUCKET"),
             "region_name": env("S3_REGION", default="us-east-1"),
+            "use_ssl": S3_ENDPOINT.startswith("https://"),
+            "addressing_style": "path",  # obligatorio para SeaweedFS
             "default_acl": None,  # los archivos nunca son públicos
             "querystring_auth": True,
-            "querystring_expire": 300,
             "file_overwrite": False,
-            "addressing_style": "path",
         },
     }
 else:
     _almacen_por_defecto = {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
+        "BACKEND": "apps.archivos.almacen.AlmacenPrivadoLocal",
         "OPTIONS": {"location": BASE_DIR / "media"},
     }
 

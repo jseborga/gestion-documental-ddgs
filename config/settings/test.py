@@ -7,6 +7,7 @@ os.environ.setdefault("DJANGO_SECRET_KEY", "clave-solo-para-pruebas")
 os.environ.setdefault(
     "DATABASE_URL", "postgres://gestion:gestion@localhost:5432/gestion_documental"
 )
+os.environ["S3_ENDPOINT"] = ""
 os.environ["S3_ENDPOINT_URL"] = ""
 
 from .base import *  # noqa: E402, F403
@@ -14,7 +15,7 @@ from .base import *  # noqa: E402, F403
 PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
 STORAGES = {
     "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
+        "BACKEND": "apps.archivos.almacen.AlmacenPrivadoLocal",
         "OPTIONS": {"location": tempfile.mkdtemp(prefix="gd-media-")},
     },
     "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},

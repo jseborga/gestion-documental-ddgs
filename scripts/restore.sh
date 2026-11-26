@@ -33,10 +33,11 @@ pg_restore --clean --if-exists --no-owner --exit-on-error --dbname="$objetivo" "
 echo "Base de datos restaurada."
 
 if [[ "${RESTAURAR_ARCHIVOS:-no}" == "si" ]]; then
-  : "${S3_ENDPOINT_URL:?Falta S3_ENDPOINT_URL}" "${S3_BUCKET:?Falta S3_BUCKET}"
+  S3_ENDPOINT="${S3_ENDPOINT:-${S3_ENDPOINT_URL:-}}"
+  : "${S3_ENDPOINT:?Falta S3_ENDPOINT}" "${S3_BUCKET:?Falta S3_BUCKET}"
   export RCLONE_CONFIG_DESTINO_TYPE=s3
   export RCLONE_CONFIG_DESTINO_PROVIDER=SeaweedFS
-  export RCLONE_CONFIG_DESTINO_ENDPOINT="$S3_ENDPOINT_URL"
+  export RCLONE_CONFIG_DESTINO_ENDPOINT="$S3_ENDPOINT"
   export RCLONE_CONFIG_DESTINO_ACCESS_KEY_ID="$S3_ACCESS_KEY"
   export RCLONE_CONFIG_DESTINO_SECRET_ACCESS_KEY="$S3_SECRET_KEY"
   export RCLONE_CONFIG_DESTINO_REGION="${S3_REGION:-us-east-1}"

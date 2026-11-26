@@ -1,6 +1,9 @@
 # Despliegue en EasyPanel como servicio "Compose" (ver docs/despliegue-easypanel.md).
 # Diferencias con docker-compose.yml: sin puertos publicados (EasyPanel enruta el dominio
-# al servicio `web`, puerto 8000) y sin servicios de desarrollo.
+# al servicio `web`, puerto 8000), sin servicios de desarrollo y SIN SeaweedFS propio:
+# usa la instancia privada de SeaweedFS del mismo proyecto de EasyPanel por la red
+# interna de Docker, sin SSL, a través de `s3-proxy` (S3_ENDPOINT=http://s3-proxy:8333;
+# S3_SERVICIO_INTERNO=<proyecto>_<servicio>:8333). Ver docker/s3-proxy/Dockerfile.
 # Fijar versiones de imágenes antes de producción (no usar :latest).
 name: gestion-documental
 
@@ -20,42 +23,18 @@ services:
       timeout: 5s
       retries: 10
 
-  s3:
-    image: chrislusf/seaweedfs:latest
+  s3-proxy:
+    # Reenvía a la instancia privada de SeaweedFS del proyecto (S3_SERVICIO_INTERNO,
+    # p. ej. estudio_seaweedfs:8333). Sin puertos publicados.
+    build: ./docker/s3-proxy
     restart: unless-stopped
     environment:
-      S3_ACCESS_KEY: ${S3_ACCESS_KEY}
-      S3_SECRET_KEY: ${S3_SECRET_KEY}
-    entrypoint: ["/bin/sh", "-c"]
-    command:
-      - |
-        mkdir -p /etc/seaweedfs
-        cat > /etc/seaweedfs/s3.json <<EOF
-        {"identities":[{"name":"app","credentials":[{"accessKey":"$${S3_ACCESS_KEY}","secretKey":"$${S3_SECRET_KEY}"}],"actions":["Admin","Read","Write","List","Tagging"]}]}
-        EOF
-        exec weed server -dir=/data -ip.bind=0.0.0.0 -s3 -s3.port=8333 -s3.config=/etc/seaweedfs/s3.json
-    volumes:
-      - s3_data:/data
+      S3_SERVICIO_INTERNO: ${S3_SERVICIO_INTERNO}
     healthcheck:
-      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:9333/cluster/status || exit 1"]
+      test: ["CMD-SHELL", "nc -z 127.0.0.1 8333"]
       interval: 10s
-      timeout: 5s
-      retries: 12
-      start_period: 30s
-
-  s3-init:
-    image: amazon/aws-cli:latest
-    depends_on:
-      s3:
-        condition: service_healthy
-    environment:
-      AWS_ACCESS_KEY_ID: ${S3_ACCESS_KEY}
-      AWS_SECRET_ACCESS_KEY: ${S3_SECRET_KEY}
-      AWS_DEFAULT_REGION: ${S3_REGION}
-    entrypoint: ["/bin/sh", "-c"]
-    command:
-      - "aws --endpoint-url http://s3:8333 s3api head-bucket --bucket ${S3_BUCKET} || aws --endpoint-url http://s3:8333 s3 mb s3://${S3_BUCKET}"
-    restart: "no"
+      timeout: 3s
+      retries: 6
 
   web:
     build: .
@@ -66,10 +45,11 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      s3-init:
-        condition: service_completed_successfully
+      s3-proxy:
+        condition: service_healthy
     command: >
       sh -c 'python manage.py migrate --noinput &&
+             python manage.py preparar_almacenamiento &&
              if [ -n "$${DJANGO_SUPERUSER_USERNAME:-}" ]; then python manage.py createsuperuser --noinput || true; fi &&
              exec gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 60 --access-logfile -'
     expose:
@@ -109,5 +89,4 @@ services:
 
 volumes:
   db_data:
-  s3_data:
   respaldos_local:

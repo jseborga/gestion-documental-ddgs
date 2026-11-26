@@ -4,6 +4,13 @@ Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/); versionado
 
 ## [Sin publicar]
 
+### Cambiado (almacenamiento, 26/11/2026)
+- El Compose de EasyPanel usa el **SeaweedFS privado del proyecto** por la red interna (HTTP, estilo de ruta) en lugar de levantar uno propio. Variables: `S3_ENDPOINT`, `S3_REGION`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `S3_BUCKET` (se acepta `S3_ENDPOINT_URL` por compatibilidad).
+- Nuevo servicio `s3-proxy` (socat, sin privilegios): boto3 rechaza los nombres internos con guion bajo de EasyPanel; la app usa `http://s3-proxy:8333` y el proxy reenvía a `S3_SERVICIO_INTERNO`. La app no arranca, con mensaje claro, si `S3_ENDPOINT` tiene guion bajo.
+- `preparar_almacenamiento` al arrancar: comprueba o crea el bucket.
+- Los almacenamientos bloquean `url()`: los archivos nunca exponen la URL interna; se descargarán por el backend con verificación de permisos.
+- CI: `docker-compose.ci.yml` agrega un SeaweedFS de prueba para probar el Compose de EasyPanel de punta a punta, incluido `s3-proxy`.
+
 ### Corregido
 - SeaweedFS vuelve a `-ip.bind=0.0.0.0`: el aislamiento en `127.0.0.1` impedía que el servicio pasara su verificación de salud en EasyPanel. El hallazgo 1 de la auditoría D1 queda reabierto (ver `docs/auditoria-2026-11-24.md`).
 - La imagen Docker no se construía: `leaflet.js` referencia `leaflet.js.map` y el almacenamiento de estáticos de producción lo exige. Se incluye el archivo del mismo paquete npm (sumas SHA-256 actualizadas) y la generación de estáticos de producción pasa a la puerta de control y a la CI.

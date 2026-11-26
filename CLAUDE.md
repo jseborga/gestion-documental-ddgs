@@ -38,6 +38,8 @@ docker compose exec web python manage.py importar_registro_excel --archivo /dato
 - Mantener `docs/` (manuales), `CHANGELOG.md` y etiquetas de versión al cerrar cada paso.
 
 ## Prohibido
+- Entregar al navegador la URL interna del almacenamiento S3: los archivos se descargan por una vista del backend que verifica `puede()` y transmite el contenido.
+- Configurar `S3_ENDPOINT` con un host que tenga guion bajo (boto3 lo rechaza): usar `s3-proxy`.
 - Subir a GitHub los Excel de institutos o del registro aunque el demo use datos reales: se cargan solo en el servidor.
 - Presentar la imagen de una firma como firma digital (plan-general §3).
 - Subir datos reales (Excel del registro, nombres de funcionarios, `alias.csv`, `.env`).

@@ -65,7 +65,7 @@ Se detallan al iniciar cada etapa con la misma estructura (pasos, riesgos, evide
 
 ## 4. Despliegue conjunto (desde D1)
 
-> Pendiente de seguridad antes de datos reales: hallazgo 1 de la auditoría D1 reabierto (almacenamiento SeaweedFS expuesto en la red de Docker).
+> Almacenamiento: se usa el SeaweedFS privado del proyecto de EasyPanel mediante `s3-proxy` (ver `docs/despliegue-easypanel.md`). El hallazgo 1 de la auditoría D1 queda resuelto por diseño.
 
 Se hace una sola vez cuando el usuario lo indique, siguiendo `docs/despliegue-easypanel.md`:
 

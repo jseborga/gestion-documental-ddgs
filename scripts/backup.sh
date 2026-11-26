@@ -44,11 +44,12 @@ inicio=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 echo "[$inicio] Respaldo: volcado de la base de datos"
 pg_dump --format=custom --no-owner --file="$TRABAJO/base.dump" "$DATABASE_URL"
 
-if [[ -n "${S3_ENDPOINT_URL:-}" ]]; then
+S3_ENDPOINT="${S3_ENDPOINT:-${S3_ENDPOINT_URL:-}}"
+if [[ -n "$S3_ENDPOINT" ]]; then
   echo "Respaldo: copia del almacenamiento de archivos (${S3_BUCKET})"
   export RCLONE_CONFIG_ORIGEN_TYPE=s3
   export RCLONE_CONFIG_ORIGEN_PROVIDER=SeaweedFS
-  export RCLONE_CONFIG_ORIGEN_ENDPOINT="$S3_ENDPOINT_URL"
+  export RCLONE_CONFIG_ORIGEN_ENDPOINT="$S3_ENDPOINT"
   export RCLONE_CONFIG_ORIGEN_ACCESS_KEY_ID="$S3_ACCESS_KEY"
   export RCLONE_CONFIG_ORIGEN_SECRET_ACCESS_KEY="$S3_SECRET_KEY"
   export RCLONE_CONFIG_ORIGEN_REGION="${S3_REGION:-us-east-1}"
