@@ -83,14 +83,12 @@ jobs:
         include:
           - archivo: docker-compose.yml
             ajustes: ""
-          - archivo: docker-compose.easypanel.yml:docker-compose.ci.yml
-            # Igual que en EasyPanel (producción detrás de un proxy) más un SeaweedFS de prueba.
+          - archivo: docker-compose.easypanel.yml
+            # Igual que en EasyPanel: producción detrás de un proxy, con su SeaweedFS.
             ajustes: >-
               s/^DJANGO_SETTINGS_MODULE=.*/DJANGO_SETTINGS_MODULE=config.settings.prod/;
               s/^DJANGO_DEBUG=.*/DJANGO_DEBUG=False/;
-              s/^DJANGO_SECRET_KEY=.*/DJANGO_SECRET_KEY=ci-clave-ficticia-de-produccion-con-longitud-suficiente-0123456789/;
-              s#^S3_ENDPOINT=.*#S3_ENDPOINT=http://s3-proxy:8333#;
-              s/^S3_SERVICIO_INTERNO=.*/S3_SERVICIO_INTERNO=s3:8333/
+              s/^DJANGO_SECRET_KEY=.*/DJANGO_SECRET_KEY=ci-clave-ficticia-de-produccion-con-longitud-suficiente-0123456789/
     env:
       COMPOSE_FILE: ${{ matrix.archivo }}
     steps:
@@ -99,7 +97,7 @@ jobs:
         run: |
           cp .env.example .env
           if [ -n "${{ matrix.ajustes }}" ]; then sed -i "${{ matrix.ajustes }}" .env; fi
-          if [ "$COMPOSE_FILE" = docker-compose.yml ]; then servicios="db s3 s3-init web worker"; else servicios="db s3 s3-proxy web worker"; fi
+          if [ "$COMPOSE_FILE" = docker-compose.yml ]; then servicios="db s3 s3-init web worker"; else servicios="db s3 web worker"; fi
           docker compose up -d --build $servicios
       - name: Salud (espera hasta 5 minutos)
         run: |

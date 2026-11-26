@@ -8,11 +8,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/); versionado
 - `cargar_semillas --solo-estructura`: carga unidades, cargos y procesos sin personas, institutos ni proyectos ficticios (para demos con datos reales).
 
 ### Cambiado (almacenamiento, 26/11/2026)
-- El Compose de EasyPanel usa el **SeaweedFS privado del proyecto** por la red interna (HTTP, estilo de ruta) en lugar de levantar uno propio. Variables: `S3_ENDPOINT`, `S3_REGION`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `S3_BUCKET` (se acepta `S3_ENDPOINT_URL` por compatibilidad).
-- Nuevo servicio `s3-proxy` (socat, sin privilegios): boto3 rechaza los nombres internos con guion bajo de EasyPanel; la app usa `http://s3-proxy:8333` y el proxy reenvía a `S3_SERVICIO_INTERNO`. La app no arranca, con mensaje claro, si `S3_ENDPOINT` tiene guion bajo.
+- El Compose de EasyPanel mantiene su SeaweedFS propio (`S3_ENDPOINT=http://s3:8333`). Variables: `S3_ENDPOINT`, `S3_REGION`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `S3_BUCKET` (se acepta `S3_ENDPOINT_URL` por compatibilidad). `s3-init` se reemplaza por `preparar_almacenamiento`.
+- Perfil opcional `seaweedfs-externo` con `s3-proxy` (socat, sin privilegios) para usar un SeaweedFS privado ya existente: boto3 rechaza los nombres internos con guion bajo de EasyPanel. La app no arranca, con mensaje claro, si `S3_ENDPOINT` tiene guion bajo.
 - `preparar_almacenamiento` al arrancar: comprueba o crea el bucket.
 - Los almacenamientos bloquean `url()`: los archivos nunca exponen la URL interna; se descargarán por el backend con verificación de permisos.
-- CI: `docker-compose.ci.yml` agrega un SeaweedFS de prueba para probar el Compose de EasyPanel de punta a punta, incluido `s3-proxy`.
 
 ### Corregido
 - SeaweedFS vuelve a `-ip.bind=0.0.0.0`: el aislamiento en `127.0.0.1` impedía que el servicio pasara su verificación de salud en EasyPanel. El hallazgo 1 de la auditoría D1 queda reabierto (ver `docs/auditoria-2026-11-24.md`).

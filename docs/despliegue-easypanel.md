@@ -10,18 +10,13 @@ Se despliega como un servicio **Compose** con el archivo `docker-compose.easypan
 - Recursos mínimos del piloto: 4 vCPU, 8 GB de RAM, 200 GB de disco (SPEC.md §11).
 - Acceso de administrador al repositorio en GitHub para agregar una *deploy key*.
 
-## Almacenamiento: SeaweedFS privado del proyecto
+## Almacenamiento
 
-El Compose de EasyPanel **no trae SeaweedFS propio**: usa la instancia privada de SeaweedFS que ya existe en el mismo proyecto de EasyPanel, por la red interna de Docker, por HTTP y sin puertos públicos.
+Por defecto el Compose trae **su propio SeaweedFS** (servicio `s3`, `S3_ENDPOINT=http://s3:8333`), sin puertos públicos. Al arrancar, `web` ejecuta `preparar_almacenamiento`, que comprueba el bucket `S3_BUCKET` y lo crea si falta. Las descargas nunca exponen la URL interna: pasan por el backend (`apps/archivos/almacen.py` bloquea las URL directas).
 
-- **Por qué hay un `s3-proxy`:** EasyPanel nombra los servicios internos como `<proyecto>_<servicio>` (con guion bajo) y la biblioteca S3 de Python (boto3) rechaza esos nombres (`Invalid endpoint`). El servicio `s3-proxy` (socat, usuario sin privilegios) recibe en `http://s3-proxy:8333` y reenvía cada conexión a `S3_SERVICIO_INTERNO`, todo dentro de la red interna. Si se configura un `S3_ENDPOINT` con guion bajo, la aplicación no arranca y explica qué hacer.
-- **Bucket:** al arrancar, `web` ejecuta `preparar_almacenamiento`: comprueba el bucket `S3_BUCKET` y lo crea si falta. Si la identidad no tiene permiso para crearlo, créelo en SeaweedFS y vuelva a desplegar.
-- **Archivos al navegador:** nunca se entrega la URL interna. Las descargas pasan por el backend, que verifica permisos y transmite el contenido (`apps/archivos/almacen.py` bloquea las URL directas).
-- **Comprobar la red** (si `web` no arranca por el almacenamiento):
+**Riesgo conocido (auditoría D1, hallazgo 1):** los componentes internos de ese SeaweedFS escuchan en la red de Docker sin contraseña. Aceptable solo para el demo con datos de prueba en un servidor sin otros proyectos; resolver antes de cargar datos reales.
 
-  ```bash
-  docker exec -it <proyecto>_<servicio>-s3-proxy-1 nc -z <proyecto>_<servicio-seaweedfs> 8333 && echo alcanzable
-  ```
+**Opcional: usar un SeaweedFS privado que ya exista en el proyecto.** Activar el perfil `seaweedfs-externo`, que levanta `s3-proxy` (boto3 rechaza los nombres internos con guion bajo de EasyPanel, como `estudio_seaweedfs`), y configurar `S3_ENDPOINT=http://s3-proxy:8333` y `S3_SERVICIO_INTERNO=<proyecto>_<servicio>:8333`.
 
 ## Pasos
 
@@ -42,10 +37,9 @@ El Compose de EasyPanel **no trae SeaweedFS propio**: usa la instancia privada d
    CSRF_TRUSTED_ORIGINS=https://<su-dominio>
    POSTGRES_PASSWORD=<clave fuerte>
    DATABASE_URL=postgres://gestion:<la misma clave>@db:5432/gestion_documental
-   S3_ENDPOINT=http://s3-proxy:8333
-   S3_SERVICIO_INTERNO=<proyecto>_<servicio-seaweedfs>:8333
-   S3_ACCESS_KEY=<identidad de la app en su SeaweedFS>
-   S3_SECRET_KEY=<clave de esa identidad>
+   S3_ENDPOINT=http://s3:8333
+   S3_ACCESS_KEY=<clave aleatoria>
+   S3_SECRET_KEY=<clave aleatoria larga>
    S3_BUCKET=documentos
    S3_REGION=us-east-1
    INSTITUCION_NOMBRE=<nombre de la institución>
