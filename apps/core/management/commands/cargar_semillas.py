@@ -32,6 +32,11 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument("--archivo", type=Path, default=ARCHIVO_POR_DEFECTO)
+        parser.add_argument(
+            "--solo-estructura",
+            action="store_true",
+            help="Solo unidades, cargos y procesos (sin datos ficticios).",
+        )
 
     @transaction.atomic
     def handle(self, *args, **opciones):
@@ -64,6 +69,25 @@ class Command(BaseCommand):
                 },
             )
 
+        for pr in datos["procesos"]:
+            Proceso.objects.update_or_create(
+                codigo=pr["codigo"],
+                defaults={
+                    "nombre": pr["nombre"],
+                    "requiere_proyecto": pr["requiere_proyecto"],
+                    "plazo_dias_defecto": pr["plazo_dias_defecto"],
+                },
+            )
+
+        if opciones["solo_estructura"]:
+            self.stdout.write(
+                self.style.SUCCESS(
+                    f"Estructura cargada: {len(unidades)} unidades, {len(cargos)} cargos, "
+                    f"{len(datos['procesos'])} procesos. Sin datos ficticios."
+                )
+            )
+            return
+
         personas: dict[str, Persona] = {}
         for p in datos["personas"]:
             personas[p["clave"]], _ = Persona.objects.update_or_create(
@@ -93,16 +117,6 @@ class Command(BaseCommand):
                     acto_designacion=o.get("acto_designacion", ""),
                 )
                 nuevas += 1
-
-        for pr in datos["procesos"]:
-            Proceso.objects.update_or_create(
-                codigo=pr["codigo"],
-                defaults={
-                    "nombre": pr["nombre"],
-                    "requiere_proyecto": pr["requiere_proyecto"],
-                    "plazo_dias_defecto": pr["plazo_dias_defecto"],
-                },
-            )
 
         instituciones: dict[str, InstitucionExterna] = {}
         for i in datos["instituciones"]:

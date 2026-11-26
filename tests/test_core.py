@@ -196,3 +196,16 @@ class TestSemillas:
         fiscal = Persona.objects.get(email="diego.ejemplo@ejemplo.invalid")
         codigos = {c.codigo for c in selectors.cargos_vigentes(fiscal, D(2026, 7, 10))}
         assert codigos == {"DDGS-FISCAL-1", "DDGS-DIRECTOR"}
+
+
+def test_semillas_solo_estructura_sin_datos_ficticios():
+    from apps.core.models import InstitucionExterna, Proceso, Proyecto
+
+    call_command("cargar_semillas", "--solo-estructura")
+    assert Unidad.objects.filter(sigla="DDGS").exists()
+    assert Cargo.objects.filter(codigo="DDGS-DIRECTOR").exists()
+    assert Proceso.objects.count() == 8
+    assert not Persona.objects.exists()
+    assert not OcupacionCargo.objects.exists()
+    assert not InstitucionExterna.objects.exists()
+    assert not Proyecto.objects.exists()

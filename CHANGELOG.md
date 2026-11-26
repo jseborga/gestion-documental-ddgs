@@ -4,6 +4,9 @@ Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/); versionado
 
 ## [Sin publicar]
 
+### Añadido
+- `cargar_semillas --solo-estructura`: carga unidades, cargos y procesos sin personas, institutos ni proyectos ficticios (para demos con datos reales).
+
 ### Cambiado (almacenamiento, 26/11/2026)
 - El Compose de EasyPanel usa el **SeaweedFS privado del proyecto** por la red interna (HTTP, estilo de ruta) en lugar de levantar uno propio. Variables: `S3_ENDPOINT`, `S3_REGION`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `S3_BUCKET` (se acepta `S3_ENDPOINT_URL` por compatibilidad).
 - Nuevo servicio `s3-proxy` (socat, sin privilegios): boto3 rechaza los nombres internos con guion bajo de EasyPanel; la app usa `http://s3-proxy:8333` y el proxy reenvía a `S3_SERVICIO_INTERNO`. La app no arranca, con mensaje claro, si `S3_ENDPOINT` tiene guion bajo.
