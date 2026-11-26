@@ -65,7 +65,7 @@ Por eso M4 **no es un segundo registro oficial**: es el seguimiento de la Direcc
 
 El Director autorizó usar los datos existentes para el demo. Reglas:
 
-1. **Nunca en GitHub.** Los Excel y cualquier dato real se cargan directamente en el servidor (carga por el panel de administración o comando dentro del contenedor). `.gitignore` y la CI lo vigilan.
+1. **Nunca en GitHub.** Los Excel y cualquier dato real se cargan directamente en el servidor (pantalla de importación para administradores o comando dentro del contenedor). `.gitignore` y la CI lo vigilan.
 2. **Antes de cargar** (D1 terminado):
    - recrear la base con claves propias (hoy tiene la de ejemplo);
    - poner HTTPS al panel de EasyPanel;

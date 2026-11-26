@@ -284,3 +284,66 @@ def _dependencia(texto: str) -> str:
     if "privad" in t:
         return Instituto.Dependencia.PRIVADO
     return Instituto.Dependencia.SIN_DATO
+
+
+# --- Ubicación aproximada -------------------------------------------------------------
+
+
+@dataclass
+class InformeAproximacion:
+    ubicados: int = 0
+    sin_resultado: list[str] = field(default_factory=list)
+    fuera_de_zona: list[str] = field(default_factory=list)
+    simulacion: bool = False
+
+    def resumen(self) -> str:
+        modo = "SIMULACIÓN: " if self.simulacion else ""
+        return (
+            f"{modo}{self.ubicados} ubicados de forma aproximada, "
+            f"{len(self.sin_resultado)} sin resultado, {len(self.fuera_de_zona)} fuera de zona. "
+            "Corrija cada uno desde su ficha."
+        )
+
+
+def aproximar_ubicaciones(
+    *, maximo: int = 100, simular: bool = False, actor=None
+) -> InformeAproximacion:
+    """Ubica por municipio (Nominatim) los institutos sin ubicación; siempre como aproximada.
+
+    Lanza `geocodificacion.ErrorGeocodificacion` si falta configuración y `OSError` si no
+    hay conexión. Cada ubicación se guarda con su propia bitácora y evento.
+    """
+    from . import geocodificacion
+
+    informe = InformeAproximacion(simulacion=simular)
+    pendientes = (
+        Instituto.objects.filter(lat__isnull=True).exclude(municipio="").order_by("numero")[:maximo]
+    )
+    cache: dict[tuple[str, str], tuple[Decimal, Decimal] | None] = {}
+    for inst in pendientes:
+        clave = (inst.municipio.strip().lower(), inst.provincia.strip().lower())
+        if clave not in cache:
+            cache[clave] = geocodificacion.buscar_municipio(inst.municipio, inst.provincia)
+            geocodificacion.pausa()
+        coordenadas = cache[clave]
+        etiqueta = f"{inst.numero or '-'} {inst.municipio}"
+        if coordenadas is None:
+            informe.sin_resultado.append(etiqueta)
+            continue
+        lat, lon = coordenadas
+        try:
+            validar_en_zona(lat, lon)
+        except ValidationError:
+            informe.fuera_de_zona.append(etiqueta)
+            continue
+        if not simular:
+            registrar_ubicacion(
+                instituto=inst,
+                lat=lat,
+                lon=lon,
+                precision=Precision.APROXIMADA,
+                fuente=f"Aproximada por municipio ({inst.municipio}) — OpenStreetMap Nominatim",
+                actor=actor,
+            )
+        informe.ubicados += 1
+    return informe

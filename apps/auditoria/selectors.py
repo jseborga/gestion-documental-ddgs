@@ -20,3 +20,7 @@ def contar_recientes(accion: str, minutos: int, categoria: str | None = None) ->
 
 def ultimo(accion: str) -> Bitacora | None:
     return Bitacora.objects.filter(accion=accion).order_by("-creado_en", "-id").first()
+
+
+def ultimo_de(acciones: list[str]) -> Bitacora | None:
+    return Bitacora.objects.filter(accion__in=acciones).order_by("-creado_en", "-id").first()

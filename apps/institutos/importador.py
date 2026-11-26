@@ -428,3 +428,20 @@ def leer(
         techo_gestion=techo_gestion,
         huellas={"datos": huella(datos), "ficha": huella(ficha)},
     )
+
+
+def leer_observaciones_csv(ruta: Path) -> list[tuple[int | None, str]]:
+    """CSV 'numero;texto' (UTF-8, hasta 1 MB) con observaciones revisadas a mano."""
+    import csv
+
+    if ruta.stat().st_size > 1024 * 1024:
+        raise ArchivoNoValido("Las observaciones deben ser un CSV de hasta 1 MB.")
+    filas: list[tuple[int | None, str]] = []
+    try:
+        with ruta.open(encoding="utf-8-sig") as archivo:
+            for fila in csv.reader(archivo, delimiter=";"):
+                if len(fila) >= 2 and fila[0].strip().isdigit():
+                    filas.append((int(fila[0]), fila[1].strip()[:500]))
+    except UnicodeDecodeError as error:
+        raise ArchivoNoValido("El CSV de observaciones debe estar en UTF-8.") from error
+    return filas[:2000]

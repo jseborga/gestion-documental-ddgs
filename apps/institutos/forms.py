@@ -36,3 +36,46 @@ class UbicacionForm(forms.Form):
         initial=Precision.VERIFICADA_MAPA,
     )
     fuente = forms.CharField(label="Fuente", max_length=200, required=False)
+
+
+class ImportarForm(forms.Form):
+    unidad = forms.ModelChoiceField(queryset=None, label="Unidad responsable", empty_label=None)
+    datos = forms.FileField(label="Planilla de datos (.xlsx)")
+    ficha = forms.FileField(label="Ficha técnica (.xlsx)")
+    observaciones = forms.FileField(
+        label="Observaciones revisadas a mano (.csv, opcional)", required=False
+    )
+    simular = forms.BooleanField(
+        label="Solo simular (revisar sin guardar)", required=False, initial=True
+    )
+
+    def __init__(self, *args, **kwargs):
+        from django.conf import settings
+
+        from apps.core.models import Unidad
+
+        super().__init__(*args, **kwargs)
+        self.fields["unidad"].queryset = Unidad.objects.filter(activo=True).order_by("sigla")
+        sugerida = Unidad.objects.filter(sigla="DDGS").first()
+        if sugerida:
+            self.fields["unidad"].initial = sugerida.pk
+        self.max_bytes = settings.IMPORTACION_MAX_MB * 1024 * 1024
+
+    def _archivo(self, campo, extension):
+        archivo = self.cleaned_data.get(campo)
+        if archivo is None:
+            return archivo
+        if not archivo.name.lower().endswith(extension):
+            raise forms.ValidationError(f"Debe ser un archivo {extension}.")
+        if archivo.size > self.max_bytes:
+            raise forms.ValidationError("El archivo supera el tamaño máximo permitido.")
+        return archivo
+
+    def clean_datos(self):
+        return self._archivo("datos", ".xlsx")
+
+    def clean_ficha(self):
+        return self._archivo("ficha", ".xlsx")
+
+    def clean_observaciones(self):
+        return self._archivo("observaciones", ".csv")

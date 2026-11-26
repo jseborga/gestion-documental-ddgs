@@ -28,8 +28,12 @@ class Command(BaseCommand):
         unidad = Unidad.objects.filter(sigla=o["unidad"]).first()
         if unidad is None:
             raise CommandError(f"No existe la unidad '{o['unidad']}'.")
-        extra = self._leer_extra(o["observaciones_extra"]) if o["observaciones_extra"] else []
         try:
+            extra = (
+                importador.leer_observaciones_csv(o["observaciones_extra"])
+                if o["observaciones_extra"]
+                else []
+            )
             lectura = importador.leer(o["datos"], o["ficha"], extra)
         except importador.ArchivoNoValido as error:
             raise CommandError(str(error)) from error
@@ -42,13 +46,3 @@ class Command(BaseCommand):
                 escritor = csv.writer(salida, delimiter=";")
                 escritor.writerow(["numero", "observacion"])
                 escritor.writerows(informe.observaciones)
-
-    def _leer_extra(self, ruta: Path) -> list[tuple[int | None, str]]:
-        if ruta.suffix.lower() != ".csv" or ruta.stat().st_size > 1024 * 1024:
-            raise CommandError("Las observaciones extra deben ser un CSV de hasta 1 MB.")
-        filas = []
-        with ruta.open(encoding="utf-8") as archivo:
-            for fila in csv.reader(archivo, delimiter=";"):
-                if len(fila) >= 2 and fila[0].strip().isdigit():
-                    filas.append((int(fila[0]), fila[1].strip()[:500]))
-        return filas

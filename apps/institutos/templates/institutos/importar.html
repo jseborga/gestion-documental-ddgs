@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block titulo %}Importar institutos{% endblock %}
+{% block contenido %}
+<p><a href="{% url 'institutos:lista' %}">← Institutos</a></p>
+<h1>Importar planillas de institutos</h1>
+
+{% if informe %}
+<section class="tarjeta">
+  <h2>{% if informe.simulacion %}Resultado de la simulación{% else %}Importación aplicada{% endif %}</h2>
+  <p class="mensaje {% if informe.simulacion %}warning{% endif %}">{{ informe.resumen }}</p>
+  {% if informe.observaciones %}
+  <h3>Observaciones ({{ informe.observaciones|length }})</h3>
+  <ul>{% for numero, texto in informe.observaciones %}<li><strong>{{ numero|default:"—" }}</strong> · {{ texto }}</li>{% endfor %}</ul>
+  {% endif %}
+  {% if informe.simulacion %}<p>Si el resultado es correcto, vuelva a elegir los archivos, desmarque «Solo simular» e importe.</p>{% endif %}
+</section>
+{% endif %}
+
+<section class="tarjeta">
+  <h2>1. Subir planillas</h2>
+  <p class="nota">Solo archivos .xlsx sin macros. Siempre simule primero. Los archivos se procesan y se borran del servidor al terminar; queda registrada su huella en la bitácora. Puede repetir la importación: actualiza sin duplicar.</p>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {{ form.as_p }}
+    <button type="submit">Procesar</button>
+  </form>
+  {% if ultima_importacion %}<p class="nota">Última importación: {{ ultima_importacion.creado_en|date:"d/m/Y H:i" }} por {{ ultima_importacion.actor_nombre|default:"—" }} — {{ ultima_importacion.despues.resumen }}</p>{% endif %}
+</section>
+
+<section class="tarjeta">
+  <h2>2. Ubicación aproximada por municipio (opcional)</h2>
+  <p>{{ sin_ubicacion }} institutos sin ubicación. Esta opción los ubica en el centro de su municipio (OpenStreetMap), marcados como <strong>aproximados</strong> en el mapa. Las ubicaciones exactas se registran después desde cada ficha.</p>
+  {% if not contacto_configurado %}
+    <p class="mensaje warning">Falta configurar NOMINATIM_CONTACTO (correo de contacto que exige OpenStreetMap) en las variables del servidor.</p>
+  {% elif aproximacion_en_curso %}
+    <p class="mensaje">Hay una solicitud en curso. Recargue la página en unos minutos.</p>
+  {% else %}
+    <form method="post" action="{% url 'institutos:solicitar_aproximacion' %}">{% csrf_token %}<button type="submit">Ubicar de forma aproximada</button></form>
+  {% endif %}
+  {% if ultima_aproximacion %}<p class="nota">Último resultado ({{ ultima_aproximacion.creado_en|date:"d/m/Y H:i" }}): {{ ultima_aproximacion_texto }}</p>{% endif %}
+</section>
+{% endblock %}

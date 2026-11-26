@@ -5,6 +5,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/); versionado
 ## [Sin publicar]
 
 ### Añadido
+- Pantalla «Importar planillas» de institutos (solo administrador, con segundo factor): subida desde el celular o la PC, simulación previa, mismas defensas del comando, archivos temporales borrados al terminar.
+- Botón «Ubicar de forma aproximada»: la consulta a OpenStreetMap corre en el proceso de fondo (worker) y su resultado queda en la bitácora.
 - `cargar_semillas --solo-estructura`: carga unidades, cargos y procesos sin personas, institutos ni proyectos ficticios (para demos con datos reales).
 
 ### Cambiado (almacenamiento, 26/11/2026)

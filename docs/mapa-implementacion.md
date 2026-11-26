@@ -58,6 +58,7 @@ Para cada pantalla, comando o integración nueva se responde:
 | D2.5 | Ficha por pestañas | Teléfono de la autoridad solo para roles operativos de la unidad; datos de proyectos de solo lectura (M5 pendiente) |
 | D2.6 | Registro de ubicación (clic en mapa, coordenadas o enlace de Google Maps) y ubicación aproximada opcional por municipio (OpenStreetMap Nominatim) | Validación de rango geográfico; enlace analizado sin seguir redirecciones (sin SSRF); Nominatim solo desde un comando de administrador, con 1 petición por segundo; toda ubicación aproximada marcada como tal |
 | D2.7 | Auditoría de la etapa y correcciones | §5 de este documento |
+| D2.8 | Importación desde la web (solo administrador) y ubicación aproximada en segundo plano | Subida a carpeta temporal privada con nombre generado (sin usar el nombre del cliente), borrada al terminar; mismas validaciones del importador; errores inesperados sin detalles internos; la consulta a Nominatim corre en el worker (no bloquea la web) y no reintenta errores de configuración; una sola solicitud en curso |
 
 ### D3 a D6
 

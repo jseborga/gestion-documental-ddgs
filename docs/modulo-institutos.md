@@ -119,7 +119,15 @@ Cada trámite se carga como `TipoTramite` (requisitos como lista de verificació
 
 ## 11. Operación (implementado en D2)
 
-**Importar las planillas** (en el servidor; los archivos nunca se suben a GitHub):
+**Importar desde la web (celular o PC, sin SSH).** Institutos → «Importar planillas» (solo rol administrador, con segundo factor):
+
+1. Elegir la unidad responsable y los dos `.xlsx` (y, si se quiere, el CSV de observaciones revisadas a mano).
+2. Dejar marcado «Solo simular» y procesar: se muestra el resumen y las observaciones sin guardar nada.
+3. Si es correcto, volver a elegir los archivos, desmarcar «Solo simular» y procesar.
+
+Los archivos se escriben en una carpeta temporal privada con nombre generado por el servidor y se borran al terminar; en la bitácora queda la huella SHA-256 de cada uno y quién importó. En la misma pantalla, «Ubicar de forma aproximada» pide al proceso de fondo la ubicación por municipio (requiere `NOMINATIM_CONTACTO`).
+
+**Importar por comando** (alternativa en el servidor; los archivos nunca se suben a GitHub):
 
 ```bash
 # 1. Copiar los archivos al contenedor web
