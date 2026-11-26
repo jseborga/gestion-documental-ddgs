@@ -5,6 +5,7 @@ Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/); versionado
 ## [Sin publicar]
 
 ### Corregido
+- SeaweedFS vuelve a `-ip.bind=0.0.0.0`: el aislamiento en `127.0.0.1` impedía que el servicio pasara su verificación de salud en EasyPanel. El hallazgo 1 de la auditoría D1 queda reabierto (ver `docs/auditoria-2026-11-24.md`).
 - La imagen Docker no se construía: `leaflet.js` referencia `leaflet.js.map` y el almacenamiento de estáticos de producción lo exige. Se incluye el archivo del mismo paquete npm (sumas SHA-256 actualizadas) y la generación de estáticos de producción pasa a la puerta de control y a la CI.
 
 ### Añadido (etapa D2: institutos)
